@@ -18,7 +18,6 @@
     justify-content: center;
     font-family: 'Courier New', monospace;
     color: #e53e3e;
-    overflow: hidden;
     user-select: none;
   }
 
@@ -28,8 +27,7 @@
     letter-spacing: 0.3em;
     color: #e53e3e;
     margin-bottom: 0.4rem;
-    opacity: 0;
-    animation: fadein 0.8s ease 0.2s forwards;
+    animation: fadein 0.8s ease 0.2s both;
   }
 
   .tagline {
@@ -38,89 +36,99 @@
     letter-spacing: 0.25em;
     text-transform: uppercase;
     margin-bottom: 3rem;
-    opacity: 0;
-    animation: fadein 0.8s ease 0.5s forwards;
+    animation: fadein 0.8s ease 0.5s both;
   }
 
-  .install-box {
-    border: 1px solid #1e1e1e;
-    padding: 1.5rem 2rem;
+  /* Waiting state — shown before beforeinstallprompt fires */
+  #waiting {
     text-align: center;
-    max-width: 360px;
-    width: 90%;
-    opacity: 0;
-    animation: fadein 0.8s ease 1s forwards;
+    animation: fadein 0.8s ease 0.8s both;
   }
 
-  .install-arrow {
-    font-size: 0.72rem;
-    color: #333;
-    letter-spacing: 0.15em;
-    margin-bottom: 0.75rem;
-    line-height: 1.8;
-  }
-
-  .install-arrow span {
-    color: #555;
-  }
-
-  .arrow-up {
-    font-size: 1.2rem;
-    color: #e53e3e;
-    display: block;
-    margin-bottom: 0.5rem;
-    animation: bounce 1.5s ease-in-out infinite;
-  }
-
-  .timer-wrap {
-    margin-top: 2rem;
-    opacity: 0;
-    animation: fadein 0.8s ease 1.5s forwards;
-    text-align: center;
-  }
-
-  .timer-label {
-    font-size: 0.62rem;
-    color: #2a2a2a;
-    letter-spacing: 0.15em;
-    margin-bottom: 0.5rem;
-  }
-
-  .timer-bar {
-    width: 200px;
+  .waiting-bar {
+    width: 240px;
     height: 1px;
     background: #151515;
-    margin: 0 auto;
+    margin: 0 auto 0.75rem;
     overflow: hidden;
   }
 
-  .timer-fill {
+  .waiting-fill {
     height: 100%;
     width: 0%;
     background: #e53e3e;
-    transition: width 1s linear;
     box-shadow: 0 0 4px rgba(229,62,62,0.4);
+    transition: width 1s linear;
   }
 
-  .ready-msg {
+  .waiting-label {
+    font-size: 0.62rem;
+    color: #2a2a2a;
+    letter-spacing: 0.15em;
+  }
+
+  /* Install button — shown when beforeinstallprompt fires */
+  #install-wrap {
     display: none;
-    margin-top: 2.5rem;
-    font-size: 0.72rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    animation: fadein 0.5s ease both;
+  }
+
+  #install-wrap.show { display: flex; }
+
+  .install-btn {
+    background: none;
+    border: 1px solid #e53e3e;
+    color: #e53e3e;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    padding: 0.7rem 2.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .install-btn:hover {
+    background: rgba(229,62,62,0.1);
+    box-shadow: 0 0 20px rgba(229,62,62,0.25);
+  }
+
+  .install-note {
+    font-size: 0.62rem;
+    color: #333;
+    letter-spacing: 0.1em;
+  }
+
+  /* Already installed state */
+  #installed-wrap {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    animation: fadein 0.5s ease both;
+  }
+
+  #installed-wrap.show { display: flex; }
+
+  .installed-label {
+    font-size: 0.75rem;
     color: #e53e3e;
     letter-spacing: 0.2em;
-    animation: pulse 1.5s ease-in-out infinite;
+    animation: pulse 2s ease-in-out infinite;
   }
 
-  .ready-msg.show { display: block; }
+  .installed-sub {
+    font-size: 0.62rem;
+    color: #333;
+    letter-spacing: 0.1em;
+  }
 
   @keyframes fadein {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
   }
 
   @keyframes pulse {
@@ -134,45 +142,83 @@
 <div class="logo">bmatterOS</div>
 <div class="tagline">your personal game portal</div>
 
-<div class="install-box">
-  <div class="arrow-up">↑</div>
-  <div class="install-arrow">
-    Look for the <span>install button</span> in your<br>
-    address bar to install bmatterOS<br>
-    as a standalone app
+<!-- Shown while waiting for Chrome to allow install -->
+<div id="waiting">
+  <div class="waiting-bar">
+    <div class="waiting-fill" id="waiting-fill"></div>
   </div>
+  <div class="waiting-label" id="waiting-label">preparing...</div>
 </div>
 
-<div class="timer-wrap">
-  <div class="timer-label">preparing install prompt...</div>
-  <div class="timer-bar">
-    <div class="timer-fill" id="timer-fill"></div>
-  </div>
+<!-- Shown when PWA is installable -->
+<div id="install-wrap">
+  <button class="install-btn" id="install-btn">⊕ Install bmatterOS</button>
+  <div class="install-note">installs as a standalone app</div>
 </div>
 
-<div class="ready-msg" id="ready-msg">
-  ✓ install button should now be visible in your address bar
+<!-- Shown after install completes -->
+<div id="installed-wrap">
+  <div class="installed-label">✓ installed</div>
+  <div class="installed-sub">open bmatterOS from your taskbar or start menu</div>
 </div>
 
 <script>
+  let deferredPrompt = null;
+
+  // Register service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
 
-  // Animate the progress bar over 32 seconds (slightly over Chrome's 30s requirement)
-  let progress = 0;
-  const fill = document.getElementById('timer-fill');
-  const readyMsg = document.getElementById('ready-msg');
+  // Check if already running as installed PWA
+  if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+    // Already installed and opened as app — redirect to launch
+    window.location.href = '/launch.html';
+  }
 
-  const interval = setInterval(() => {
-    progress += (100 / 32);
-    fill.style.width = Math.min(progress, 100) + '%';
-    if (progress >= 100) {
-      clearInterval(interval);
-      document.querySelector('.timer-wrap .timer-label').textContent = 'ready.';
-      readyMsg.classList.add('show');
+  // Progress bar ticking while we wait
+  let progress = 0;
+  const fill = document.getElementById('waiting-fill');
+  const label = document.getElementById('waiting-label');
+  const ticker = setInterval(() => {
+    progress += 3.125; // reaches 100 in 32 seconds
+    fill.style.width = Math.min(progress, 95) + '%';
+    if (progress >= 95) {
+      label.textContent = 'waiting for browser...';
     }
   }, 1000);
+
+  // This fires when Chrome decides the PWA is installable
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Stop the progress bar and show install button
+    clearInterval(ticker);
+    fill.style.width = '100%';
+    document.getElementById('waiting').style.display = 'none';
+    document.getElementById('install-wrap').classList.add('show');
+  });
+
+  // Handle install button click
+  document.getElementById('install-btn').addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log('Install outcome:', outcome);
+    deferredPrompt = null;
+    if (outcome === 'accepted') {
+      document.getElementById('install-wrap').classList.remove('show');
+      document.getElementById('installed-wrap').classList.add('show');
+    }
+  });
+
+  // Hide install button if already installed via address bar
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    document.getElementById('install-wrap').classList.remove('show');
+    document.getElementById('installed-wrap').classList.add('show');
+  });
 </script>
 
 </body>
