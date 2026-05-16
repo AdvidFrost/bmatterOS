@@ -8,27 +8,172 @@
 <meta name="theme-color" content="#0a0a0a">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
   body {
     background: #0a0a0a;
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     font-family: 'Courier New', monospace;
+    color: #e53e3e;
+    overflow: hidden;
+    user-select: none;
   }
-  .msg {
-    color: #222;
-    font-size: 0.7rem;
+
+  .logo {
+    font-size: 3rem;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    color: #e53e3e;
+    margin-bottom: 0.4rem;
+    opacity: 0;
+    animation: fadein 0.8s ease 0.2s forwards;
+  }
+
+  .tagline {
+    font-size: 0.72rem;
+    color: #444;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadein 0.8s ease 0.5s forwards;
+  }
+
+  .install-box {
+    border: 1px solid #1e1e1e;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    max-width: 360px;
+    width: 90%;
+    opacity: 0;
+    animation: fadein 0.8s ease 1s forwards;
+  }
+
+  .install-arrow {
+    font-size: 0.72rem;
+    color: #333;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+    line-height: 1.8;
+  }
+
+  .install-arrow span {
+    color: #555;
+  }
+
+  .arrow-up {
+    font-size: 1.2rem;
+    color: #e53e3e;
+    display: block;
+    margin-bottom: 0.5rem;
+    animation: bounce 1.5s ease-in-out infinite;
+  }
+
+  .timer-wrap {
+    margin-top: 2rem;
+    opacity: 0;
+    animation: fadein 0.8s ease 1.5s forwards;
+    text-align: center;
+  }
+
+  .timer-label {
+    font-size: 0.62rem;
+    color: #2a2a2a;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+
+  .timer-bar {
+    width: 200px;
+    height: 1px;
+    background: #151515;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  .timer-fill {
+    height: 100%;
+    width: 0%;
+    background: #e53e3e;
+    transition: width 1s linear;
+    box-shadow: 0 0 4px rgba(229,62,62,0.4);
+  }
+
+  .ready-msg {
+    display: none;
+    margin-top: 2.5rem;
+    font-size: 0.72rem;
+    color: #e53e3e;
     letter-spacing: 0.2em;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .ready-msg.show { display: block; }
+
+  @keyframes fadein {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
   }
 </style>
 </head>
 <body>
-<div class="msg">.</div>
+
+<div class="logo">bmatterOS</div>
+<div class="tagline">your personal game portal</div>
+
+<div class="install-box">
+  <div class="arrow-up">↑</div>
+  <div class="install-arrow">
+    Look for the <span>install button</span> in your<br>
+    address bar to install bmatterOS<br>
+    as a standalone app
+  </div>
+</div>
+
+<div class="timer-wrap">
+  <div class="timer-label">preparing install prompt...</div>
+  <div class="timer-bar">
+    <div class="timer-fill" id="timer-fill"></div>
+  </div>
+</div>
+
+<div class="ready-msg" id="ready-msg">
+  ✓ install button should now be visible in your address bar
+</div>
+
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
+
+  // Animate the progress bar over 32 seconds (slightly over Chrome's 30s requirement)
+  let progress = 0;
+  const fill = document.getElementById('timer-fill');
+  const readyMsg = document.getElementById('ready-msg');
+
+  const interval = setInterval(() => {
+    progress += (100 / 32);
+    fill.style.width = Math.min(progress, 100) + '%';
+    if (progress >= 100) {
+      clearInterval(interval);
+      document.querySelector('.timer-wrap .timer-label').textContent = 'ready.';
+      readyMsg.classList.add('show');
+    }
+  }, 1000);
 </script>
+
 </body>
 </html>
