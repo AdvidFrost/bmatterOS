@@ -2,10 +2,10 @@
   "name": "bmatterOS",
   "short_name": "bmatterOS",
   "description": "bmatterOS",
-  "start_url": "/launch.html",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#0a0a0a",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "prefer_related_applications": false,
   "icons": [
     {
