@@ -2,941 +2,310 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>&#8203;</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bmatterOS</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d0d0d;
-    --bg2: #141414;
-    --bg3: #1a1a1a;
-    --bg4: #222222;
-    --accent: #e53e3e;
-    --accent2: #fc5c5c;
-    --accent-dim: rgba(229,62,62,0.15);
-    --accent-glow: rgba(229,62,62,0.3);
-    --text: #e8e8e8;
-    --text2: #999;
-    --text3: #555;
-    --border: #2a2a2a;
-    --sidebar-w: 200px;
-    --topbar-h: 48px;
-    --font-ui: 'Barlow', sans-serif;
-    --font-mono: 'Share Tech Mono', monospace;
+    --bg: #0d0d0d; --bg2: #141414; --bg3: #1a1a1a; --bg4: #222222;
+    --accent: #e53e3e; --accent2: #fc5c5c;
+    --accent-dim: rgba(229,62,62,0.15); --accent-glow: rgba(229,62,62,0.3);
+    --text: #e8e8e8; --text2: #999; --text3: #555;
+    --border: #2a2a2a; --sidebar-w: 200px; --topbar-h: 48px;
+    --font-ui: 'Barlow', sans-serif; --font-mono: 'Share Tech Mono', monospace;
     --radius: 6px;
   }
+  [data-theme="blue"]   { --accent:#3b82f6;--accent2:#60a5fa;--accent-dim:rgba(59,130,246,0.15);--accent-glow:rgba(59,130,246,0.3); }
+  [data-theme="green"]  { --accent:#22c55e;--accent2:#4ade80;--accent-dim:rgba(34,197,94,0.15);--accent-glow:rgba(34,197,94,0.3); }
+  [data-theme="purple"] { --accent:#a855f7;--accent2:#c084fc;--accent-dim:rgba(168,85,247,0.15);--accent-glow:rgba(168,85,247,0.3); }
+  [data-theme="orange"] { --accent:#f97316;--accent2:#fb923c;--accent-dim:rgba(249,115,22,0.15);--accent-glow:rgba(249,115,22,0.3); }
+  [data-theme="cyan"]   { --accent:#06b6d4;--accent2:#22d3ee;--accent-dim:rgba(6,182,212,0.15);--accent-glow:rgba(6,182,212,0.3); }
+  [data-theme="light"]  { --bg:#f5f5f5;--bg2:#ebebeb;--bg3:#e0e0e0;--bg4:#d5d5d5;--text:#1a1a1a;--text2:#555;--text3:#999;--border:#d0d0d0;--accent:#e53e3e;--accent2:#fc5c5c;--accent-dim:rgba(229,62,62,0.12);--accent-glow:rgba(229,62,62,0.25); }
 
-  /* THEMES */
-  [data-theme="blue"] {
-    --accent: #3b82f6; --accent2: #60a5fa;
-    --accent-dim: rgba(59,130,246,0.15);
-    --accent-glow: rgba(59,130,246,0.3);
-  }
-  [data-theme="green"] {
-    --accent: #22c55e; --accent2: #4ade80;
-    --accent-dim: rgba(34,197,94,0.15);
-    --accent-glow: rgba(34,197,94,0.3);
-  }
-  [data-theme="purple"] {
-    --accent: #a855f7; --accent2: #c084fc;
-    --accent-dim: rgba(168,85,247,0.15);
-    --accent-glow: rgba(168,85,247,0.3);
-  }
-  [data-theme="orange"] {
-    --accent: #f97316; --accent2: #fb923c;
-    --accent-dim: rgba(249,115,22,0.15);
-    --accent-glow: rgba(249,115,22,0.3);
-  }
-  [data-theme="cyan"] {
-    --accent: #06b6d4; --accent2: #22d3ee;
-    --accent-dim: rgba(6,182,212,0.15);
-    --accent-glow: rgba(6,182,212,0.3);
-  }
-  [data-theme="light"] {
-    --bg: #f5f5f5; --bg2: #ebebeb; --bg3: #e0e0e0; --bg4: #d5d5d5;
-    --text: #1a1a1a; --text2: #555; --text3: #999;
-    --border: #d0d0d0;
-    --accent: #e53e3e; --accent2: #fc5c5c;
-    --accent-dim: rgba(229,62,62,0.12);
-    --accent-glow: rgba(229,62,62,0.25);
-  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; background:#0a0a0a; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-ui);
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+  /* TERMINAL LOADER */
+  #terminal-loader {
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    background:#0a0a0a; color:#ccc;
+    font-family:'Share Tech Mono',monospace; font-size:13px;
+    padding:20px; z-index:10000; overflow-y:auto;
   }
+  .tl { margin-bottom:4px; line-height:1.5; }
+  .tl-red   { color:#e53e3e; }
+  .tl-dim   { color:#555; }
+  .tl-cursor { display:inline-block; width:8px; height:14px; background:#e53e3e; vertical-align:middle; animation:blink 0.8s infinite; }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0} }
+
+  /* APP */
+  #app { display:none; flex-direction:column; height:100%; background:var(--bg); color:var(--text); font-family:var(--font-ui); }
+  #app.visible { display:flex; }
 
   /* TOPBAR */
   #topbar {
-    height: var(--topbar-h);
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    padding: 0 1rem;
-    gap: 1.5rem;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 10;
+    height:var(--topbar-h); background:var(--bg2);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; padding:0 1rem; gap:1.5rem; flex-shrink:0; z-index:10;
   }
-
-  .brand {
-    font-family: var(--font-mono);
-    font-size: 1rem;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    text-shadow: 0 0 12px var(--accent-glow);
-    white-space: nowrap;
-    margin-right: 0.5rem;
-  }
-
-  .brand span {
-    color: var(--text3);
-    font-size: 0.7rem;
-    margin-left: 6px;
-  }
-
-  .topnav {
-    display: flex;
-    gap: 0.25rem;
-  }
-
-  .topnav-btn {
-    background: none;
-    border: none;
-    color: var(--text2);
-    font-family: var(--font-ui);
-    font-size: 0.82rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.35rem 0.85rem;
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .topnav-btn:hover {
-    background: var(--bg3);
-    color: var(--text);
-  }
-
-  .topnav-btn.active {
-    background: var(--accent-dim);
-    color: var(--accent);
-  }
-
-  .topbar-right {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .search-box {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: var(--font-ui);
-    font-size: 0.82rem;
-    padding: 0.3rem 0.75rem;
-    width: 180px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-
-  .search-box:focus {
-    border-color: var(--accent);
-  }
-
-  .search-box::placeholder { color: var(--text3); }
+  .brand { font-family:var(--font-mono); font-size:1rem; color:var(--accent); letter-spacing:0.1em; text-shadow:0 0 12px var(--accent-glow); white-space:nowrap; margin-right:0.5rem; }
+  .brand span { color:var(--text3); font-size:0.7rem; margin-left:6px; }
+  .topnav { display:flex; gap:0.25rem; }
+  .topnav-btn { background:none; border:none; color:var(--text2); font-family:var(--font-ui); font-size:0.82rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; padding:0.35rem 0.85rem; border-radius:var(--radius); cursor:pointer; transition:all 0.15s; }
+  .topnav-btn:hover { background:var(--bg3); color:var(--text); }
+  .topnav-btn.active { background:var(--accent-dim); color:var(--accent); }
+  .topbar-right { margin-left:auto; display:flex; align-items:center; gap:0.5rem; }
+  .search-box { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-family:var(--font-ui); font-size:0.82rem; padding:0.3rem 0.75rem; width:180px; outline:none; transition:border-color 0.15s; }
+  .search-box:focus { border-color:var(--accent); }
+  .search-box::placeholder { color:var(--text3); }
 
   /* LAYOUT */
-  #layout {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
-
-  /* SIDEBAR */
-  #sidebar {
-    width: var(--sidebar-w);
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
-    flex-shrink: 0;
-    padding: 0.75rem 0;
-  }
-
-  #sidebar::-webkit-scrollbar { width: 4px; }
-  #sidebar::-webkit-scrollbar-track { background: transparent; }
-  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  .sidebar-section {
-    padding: 0.5rem 0;
-  }
-
-  .sidebar-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text3);
-    padding: 0.25rem 1rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .sidebar-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 1rem;
-    font-size: 0.83rem;
-    color: var(--text2);
-    cursor: pointer;
-    transition: all 0.12s;
-    border-left: 2px solid transparent;
-    user-select: none;
-  }
-
-  .sidebar-item:hover {
-    background: var(--bg3);
-    color: var(--text);
-  }
-
-  .sidebar-item.active {
-    color: var(--accent);
-    border-left-color: var(--accent);
-    background: var(--accent-dim);
-  }
-
-  .sidebar-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--text3);
-    flex-shrink: 0;
-  }
-
-  .sidebar-item.active .sidebar-dot {
-    background: var(--accent);
-    box-shadow: 0 0 6px var(--accent-glow);
-  }
-
-  /* MAIN */
-  #main {
-    flex: 1;
-    overflow: hidden;
-    position: relative;
-  }
-
-  .tab-panel {
-    display: none;
-    height: 100%;
-    overflow-y: auto;
-    padding: 1.5rem;
-  }
-
-  .tab-panel.active { display: block; }
-
-  .tab-panel::-webkit-scrollbar { width: 6px; }
-  .tab-panel::-webkit-scrollbar-track { background: transparent; }
-  .tab-panel::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
-
-  /* HOME TAB */
-  .home-header {
-    margin-bottom: 1.5rem;
-  }
-
-  .home-header h1 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 0.25rem;
-  }
-
-  .home-header p {
-    color: var(--text2);
-    font-size: 0.88rem;
-  }
-
-  .changelog-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-  }
-
-  .changelog-version {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    color: var(--accent);
-    margin-bottom: 0.25rem;
-  }
-
-  .changelog-date {
-    font-size: 0.75rem;
-    color: var(--text3);
-    margin-bottom: 0.75rem;
-  }
-
-  .changelog-card ul {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .changelog-card li {
-    font-size: 0.85rem;
-    color: var(--text2);
-    padding-left: 1rem;
-    position: relative;
-  }
-
-  .changelog-card li::before {
-    content: '›';
-    position: absolute;
-    left: 0;
-    color: var(--accent);
-  }
-
-  .section-title {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text3);
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .featured-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .featured-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .featured-card:hover {
-    border-color: var(--accent);
-    background: var(--bg3);
-  }
-
-  .featured-icon {
-    font-size: 1.5rem;
-  }
-
-  .featured-name {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .featured-desc {
-    font-size: 0.75rem;
-    color: var(--text2);
-  }
-
-  /* GAMES TAB */
-  .games-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .game-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.15s;
-    position: relative;
-  }
-
-  .game-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-  }
-
-  .game-thumb {
-    width: 100%;
-    height: 110px;
-    background: var(--bg3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .game-thumb::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 40px;
-    background: linear-gradient(transparent, var(--bg2));
-  }
-
-  .game-info {
-    padding: 0.6rem 0.75rem;
-  }
-
-  .game-name {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 0.15rem;
-  }
-
-  .game-tag {
-    font-size: 0.7rem;
-    color: var(--accent);
-    font-family: var(--font-mono);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  /* IFRAME OVERLAY */
-  #game-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: var(--bg);
-    z-index: 100;
-    flex-direction: column;
-  }
-
-  #game-overlay.open { display: flex; }
-
-  .overlay-bar {
-    height: 40px;
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    padding: 0 1rem;
-    gap: 0.75rem;
-    flex-shrink: 0;
-  }
-
-  .overlay-title {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text);
-    flex: 1;
-  }
-
-  .overlay-close {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text2);
-    font-size: 0.8rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-family: var(--font-ui);
-    transition: all 0.12s;
-  }
-
-  .overlay-close:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  #game-frame {
-    flex: 1;
-    border: none;
-    width: 100%;
-  }
-
-  /* TIC TAC TOE */
-  .ttt-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1.5rem;
-    height: 100%;
-  }
-
-  .ttt-status {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 1.25rem;
-    font-family: var(--font-mono);
-  }
-
-  .ttt-status span { color: var(--accent); }
-
-  .ttt-board {
-    display: grid;
-    grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(3, 100px);
-    gap: 6px;
-  }
-
-  .ttt-cell {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.2rem;
-    font-weight: 900;
-    cursor: pointer;
-    transition: all 0.12s;
-    user-select: none;
-  }
-
-  .ttt-cell:hover:not(.filled) {
-    background: var(--bg4);
-    border-color: var(--accent);
-  }
-
-  .ttt-cell.x { color: var(--accent); }
-  .ttt-cell.o { color: var(--text2); }
-  .ttt-cell.win { background: var(--accent-dim); border-color: var(--accent); }
-
-  .ttt-reset {
-    margin-top: 1.25rem;
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text2);
-    font-family: var(--font-ui);
-    font-size: 0.82rem;
-    padding: 0.4rem 1.2rem;
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: all 0.12s;
-    letter-spacing: 0.05em;
-  }
-
-  .ttt-reset:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  .score-row {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 1rem;
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    color: var(--text3);
-  }
-
-  .score-row span { color: var(--accent); font-weight: 700; }
-
-  /* SETTINGS TAB */
-  .settings-section {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-  }
-
-  .settings-section h3 {
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text3);
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .setting-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-  }
-
-  .setting-label {
-    font-size: 0.88rem;
-    color: var(--text);
-  }
-
-  .setting-desc {
-    font-size: 0.75rem;
-    color: var(--text3);
-    margin-top: 0.1rem;
-  }
-
-  .theme-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-  }
-
-  .theme-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.6rem 0.5rem;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: all 0.12s;
-    font-family: var(--font-ui);
-    font-size: 0.72rem;
-    color: var(--text2);
-  }
-
-  .theme-btn:hover { border-color: var(--text3); }
-
-  .theme-btn.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-dim);
-  }
-
-  .theme-dot {
-    width: 18px; height: 18px;
-    border-radius: 50%;
-  }
-
-  .toggle {
-    position: relative;
-    width: 40px; height: 22px;
-    cursor: pointer;
-  }
-
-  .toggle input { display: none; }
-
-  .toggle-track {
-    width: 100%; height: 100%;
-    background: var(--bg4);
-    border-radius: 11px;
-    border: 1px solid var(--border);
-    transition: all 0.2s;
-    position: absolute;
-  }
-
-  .toggle input:checked + .toggle-track {
-    background: var(--accent-dim);
-    border-color: var(--accent);
-  }
-
-  .toggle-thumb {
-    width: 16px; height: 16px;
-    background: var(--text3);
-    border-radius: 50%;
-    position: absolute;
-    top: 3px; left: 3px;
-    transition: all 0.2s;
-    pointer-events: none;
-  }
-
-  .toggle input:checked ~ .toggle-thumb {
-    transform: translateX(18px);
-    background: var(--accent);
-  }
-
-  select.setting-select {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--font-ui);
-    font-size: 0.82rem;
-    padding: 0.3rem 0.6rem;
-    border-radius: var(--radius);
-    outline: none;
-    cursor: pointer;
-  }
-
-  select.setting-select:focus { border-color: var(--accent); }
-
-  .about-box {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    color: var(--text3);
-    line-height: 1.9;
-  }
-
-  .about-box span { color: var(--accent); }
+  #layout { display:flex; flex:1; overflow:hidden; }
+  #sidebar { width:var(--sidebar-w); background:var(--bg2); border-right:1px solid var(--border); overflow-y:auto; flex-shrink:0; padding:0.75rem 0; }
+  #sidebar::-webkit-scrollbar { width:4px; }
+  #sidebar::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+  .sidebar-label { font-size:0.65rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--text3); padding:0.25rem 1rem; margin-bottom:0.25rem; }
+  .sidebar-item { display:flex; align-items:center; gap:0.5rem; padding:0.4rem 1rem; font-size:0.83rem; color:var(--text2); cursor:pointer; transition:all 0.12s; border-left:2px solid transparent; user-select:none; }
+  .sidebar-item:hover { background:var(--bg3); color:var(--text); }
+  .sidebar-item.active { color:var(--accent); border-left-color:var(--accent); background:var(--accent-dim); }
+  .sidebar-dot { width:6px; height:6px; border-radius:50%; background:var(--text3); flex-shrink:0; }
+  .sidebar-item.active .sidebar-dot { background:var(--accent); box-shadow:0 0 6px var(--accent-glow); }
+
+  #main { flex:1; overflow:hidden; position:relative; }
+  .tab-panel { display:none; height:100%; overflow-y:auto; padding:1.5rem; }
+  .tab-panel.active { display:block; }
+  .tab-panel::-webkit-scrollbar { width:6px; }
+  .tab-panel::-webkit-scrollbar-thumb { background:var(--bg4); border-radius:3px; }
+
+  /* HOME */
+  .home-header { margin-bottom:1.5rem; }
+  .home-header h1 { font-size:1.6rem; font-weight:700; color:var(--text); margin-bottom:0.25rem; }
+  .home-header p { color:var(--text2); font-size:0.88rem; }
+  .changelog-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; margin-bottom:1rem; }
+  .changelog-version { font-family:var(--font-mono); font-size:0.85rem; color:var(--accent); margin-bottom:0.25rem; }
+  .changelog-date { font-size:0.75rem; color:var(--text3); margin-bottom:0.75rem; }
+  .changelog-card ul { list-style:none; display:flex; flex-direction:column; gap:0.4rem; }
+  .changelog-card li { font-size:0.85rem; color:var(--text2); padding-left:1rem; position:relative; }
+  .changelog-card li::before { content:'›'; position:absolute; left:0; color:var(--accent); }
+  .section-title { font-size:0.7rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--text3); margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border); }
+  .featured-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:0.75rem; margin-bottom:1.5rem; }
+  .featured-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1rem; cursor:pointer; transition:all 0.15s; display:flex; flex-direction:column; gap:0.5rem; }
+  .featured-card:hover { border-color:var(--accent); background:var(--bg3); }
+  .featured-icon { font-size:1.5rem; }
+  .featured-name { font-size:0.85rem; font-weight:600; color:var(--text); }
+  .featured-desc { font-size:0.75rem; color:var(--text2); }
+
+  /* GAMES */
+  .games-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:0.75rem; margin-bottom:1.5rem; }
+  .game-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; cursor:pointer; transition:all 0.15s; }
+  .game-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+  .game-thumb { width:100%; height:110px; background:var(--bg3); display:flex; align-items:center; justify-content:center; font-size:2.5rem; position:relative; overflow:hidden; }
+  .game-thumb::after { content:''; position:absolute; bottom:0; left:0; right:0; height:40px; background:linear-gradient(transparent,var(--bg2)); }
+  .game-info { padding:0.6rem 0.75rem; }
+  .game-name { font-size:0.85rem; font-weight:600; color:var(--text); margin-bottom:0.15rem; }
+  .game-tag { font-size:0.7rem; color:var(--accent); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.05em; }
+
+  /* GAME OVERLAY */
+  #game-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:var(--bg); z-index:100; flex-direction:column; }
+  #game-overlay.open { display:flex; }
+  .overlay-bar { height:40px; background:var(--bg2); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 1rem; gap:0.75rem; flex-shrink:0; }
+  .overlay-title { font-size:0.85rem; font-weight:600; color:var(--text); flex:1; }
+  .overlay-close { background:none; border:1px solid var(--border); color:var(--text2); font-size:0.8rem; padding:0.2rem 0.6rem; border-radius:4px; cursor:pointer; font-family:var(--font-ui); transition:all 0.12s; }
+  .overlay-close:hover { border-color:var(--accent); color:var(--accent); }
+
+  /* TTT */
+  .ttt-wrap { display:flex; flex-direction:column; align-items:center; padding:1.5rem; height:100%; }
+  .ttt-status { font-size:1rem; font-weight:600; color:var(--text); margin-bottom:1.25rem; font-family:var(--font-mono); }
+  .ttt-status span { color:var(--accent); }
+  .ttt-board { display:grid; grid-template-columns:repeat(3,100px); grid-template-rows:repeat(3,100px); gap:6px; }
+  .ttt-cell { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; font-size:2.2rem; font-weight:900; cursor:pointer; transition:all 0.12s; user-select:none; }
+  .ttt-cell:hover:not(.filled) { background:var(--bg4); border-color:var(--accent); }
+  .ttt-cell.x { color:var(--accent); } .ttt-cell.o { color:var(--text2); } .ttt-cell.win { background:var(--accent-dim); border-color:var(--accent); }
+  .ttt-reset { margin-top:1.25rem; background:none; border:1px solid var(--border); color:var(--text2); font-family:var(--font-ui); font-size:0.82rem; padding:0.4rem 1.2rem; border-radius:var(--radius); cursor:pointer; transition:all 0.12s; }
+  .ttt-reset:hover { border-color:var(--accent); color:var(--accent); }
+  .score-row { display:flex; gap:1.5rem; margin-bottom:1rem; font-family:var(--font-mono); font-size:0.85rem; color:var(--text3); }
+  .score-row span { color:var(--accent); font-weight:700; }
+
+  /* SETTINGS */
+  .settings-section { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; margin-bottom:1rem; }
+  .settings-section h3 { font-size:0.8rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border); }
+  .setting-row { display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0; }
+  .setting-label { font-size:0.88rem; color:var(--text); }
+  .setting-desc { font-size:0.75rem; color:var(--text3); margin-top:0.1rem; }
+  .theme-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:0.5rem; margin-top:0.75rem; }
+  .theme-btn { display:flex; flex-direction:column; align-items:center; gap:0.4rem; padding:0.6rem 0.5rem; background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); cursor:pointer; transition:all 0.12s; font-family:var(--font-ui); font-size:0.72rem; color:var(--text2); }
+  .theme-btn:hover { border-color:var(--text3); }
+  .theme-btn.active { border-color:var(--accent); color:var(--accent); background:var(--accent-dim); }
+  .theme-dot { width:18px; height:18px; border-radius:50%; }
+  .toggle { position:relative; width:40px; height:22px; cursor:pointer; }
+  .toggle input { display:none; }
+  .toggle-track { width:100%; height:100%; background:var(--bg4); border-radius:11px; border:1px solid var(--border); transition:all 0.2s; position:absolute; }
+  .toggle input:checked + .toggle-track { background:var(--accent-dim); border-color:var(--accent); }
+  .toggle-thumb { width:16px; height:16px; background:var(--text3); border-radius:50%; position:absolute; top:3px; left:3px; transition:all 0.2s; pointer-events:none; }
+  .toggle input:checked ~ .toggle-thumb { transform:translateX(18px); background:var(--accent); }
+  .about-box { font-family:var(--font-mono); font-size:0.78rem; color:var(--text3); line-height:1.9; }
+  .about-box span { color:var(--accent); }
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
-<div id="topbar">
-  <div class="brand">bmatterOS <span>v1.0.0</span></div>
-  <nav class="topnav">
-    <button class="topnav-btn active" onclick="switchTab('home')">Home</button>
-    <button class="topnav-btn" onclick="switchTab('games')">Games</button>
-    <button class="topnav-btn" onclick="switchTab('settings')">Settings</button>
-  </nav>
-  <div class="topbar-right">
-    <input type="text" class="search-box" placeholder="Search games..." oninput="filterGames(this.value)" id="searchbox">
-  </div>
+<div id="terminal-loader">
+  <div id="tl-content"></div>
+  <div class="tl">C:\Users\bmatter&gt; <span class="tl-cursor"></span></div>
 </div>
 
-<!-- LAYOUT -->
-<div id="layout">
-
-  <!-- SIDEBAR -->
-  <div id="sidebar">
-    <div class="sidebar-section" id="sidebar-content">
-      <!-- populated by JS -->
+<div id="app">
+  <div id="topbar">
+    <div class="brand">bmatterOS <span>v1.0.0</span></div>
+    <nav class="topnav">
+      <button class="topnav-btn active" onclick="switchTab('home')">Home</button>
+      <button class="topnav-btn" onclick="switchTab('games')">Games</button>
+      <button class="topnav-btn" onclick="switchTab('settings')">Settings</button>
+    </nav>
+    <div class="topbar-right">
+      <input type="text" class="search-box" placeholder="Search games..." oninput="filterGames(this.value)" id="searchbox">
     </div>
   </div>
 
-  <!-- MAIN CONTENT -->
-  <div id="main">
-
-    <!-- HOME TAB -->
-    <div class="tab-panel active" id="tab-home">
-      <div class="home-header">
-        <h1>Welcome back.</h1>
-        <p>bmatterOS — your personal game portal</p>
-      </div>
-
-      <div class="section-title">What's New</div>
-      <div class="changelog-card">
-        <div class="changelog-version">v1.0.0</div>
-        <div class="changelog-date">Initial Release</div>
-        <ul>
-          <li>bmatterOS launched</li>
-          <li>Dark red theme with 5 alternate color themes</li>
-          <li>Games tab with Tic-Tac-Toe built in</li>
-          <li>Settings with theme switcher and toggles</li>
-          <li>PWA install + about:blank cloaking</li>
-        </ul>
-      </div>
-
-      <div class="section-title" style="margin-top:1.5rem">Quick Launch</div>
-      <div class="featured-grid" id="featured-grid">
-        <!-- populated by JS -->
-      </div>
+  <div id="layout">
+    <div id="sidebar">
+      <div id="sidebar-content"></div>
     </div>
-
-    <!-- GAMES TAB -->
-    <div class="tab-panel" id="tab-games">
-      <div class="section-title">All Games</div>
-      <div class="games-grid" id="games-grid">
-        <!-- populated by JS -->
+    <div id="main">
+      <div class="tab-panel active" id="tab-home">
+        <div class="home-header">
+          <h1>Welcome back.</h1>
+          <p>bmatterOS — your personal game portal</p>
+        </div>
+        <div class="section-title">What's New</div>
+        <div class="changelog-card">
+          <div class="changelog-version">v1.0.0</div>
+          <div class="changelog-date">Initial Release</div>
+          <ul>
+            <li>bmatterOS launched</li>
+            <li>Dark red theme with 6 alternate color themes</li>
+            <li>Games tab with Tic-Tac-Toe built in</li>
+            <li>Settings with theme switcher and toggles</li>
+            <li>PWA install + about:blank cloaking</li>
+          </ul>
+        </div>
+        <div class="section-title" style="margin-top:1.5rem">Quick Launch</div>
+        <div class="featured-grid" id="featured-grid"></div>
       </div>
-    </div>
 
-    <!-- SETTINGS TAB -->
-    <div class="tab-panel" id="tab-settings">
-      <div class="section-title">Settings</div>
+      <div class="tab-panel" id="tab-games">
+        <div class="section-title">All Games</div>
+        <div class="games-grid" id="games-grid"></div>
+      </div>
 
-      <div class="settings-section">
-        <h3>Appearance</h3>
-        <div>
+      <div class="tab-panel" id="tab-settings">
+        <div class="section-title">Settings</div>
+        <div class="settings-section">
+          <h3>Appearance</h3>
           <div class="setting-label" style="margin-bottom:0.25rem">Color Theme</div>
           <div class="setting-desc" style="margin-bottom:0.75rem">Choose your accent color</div>
           <div class="theme-grid">
-            <button class="theme-btn active" onclick="setTheme('red')" id="theme-red">
-              <div class="theme-dot" style="background:#e53e3e"></div>Red
-            </button>
-            <button class="theme-btn" onclick="setTheme('blue')" id="theme-blue">
-              <div class="theme-dot" style="background:#3b82f6"></div>Blue
-            </button>
-            <button class="theme-btn" onclick="setTheme('green')" id="theme-green">
-              <div class="theme-dot" style="background:#22c55e"></div>Green
-            </button>
-            <button class="theme-btn" onclick="setTheme('purple')" id="theme-purple">
-              <div class="theme-dot" style="background:#a855f7"></div>Purple
-            </button>
-            <button class="theme-btn" onclick="setTheme('orange')" id="theme-orange">
-              <div class="theme-dot" style="background:#f97316"></div>Orange
-            </button>
-            <button class="theme-btn" onclick="setTheme('cyan')" id="theme-cyan">
-              <div class="theme-dot" style="background:#06b6d4"></div>Cyan
-            </button>
-            <button class="theme-btn" onclick="setTheme('light')" id="theme-light">
-              <div class="theme-dot" style="background:#f5f5f5;border:1px solid #ccc"></div>Light
-            </button>
+            <button class="theme-btn active" onclick="setTheme('red')" id="theme-red"><div class="theme-dot" style="background:#e53e3e"></div>Red</button>
+            <button class="theme-btn" onclick="setTheme('blue')" id="theme-blue"><div class="theme-dot" style="background:#3b82f6"></div>Blue</button>
+            <button class="theme-btn" onclick="setTheme('green')" id="theme-green"><div class="theme-dot" style="background:#22c55e"></div>Green</button>
+            <button class="theme-btn" onclick="setTheme('purple')" id="theme-purple"><div class="theme-dot" style="background:#a855f7"></div>Purple</button>
+            <button class="theme-btn" onclick="setTheme('orange')" id="theme-orange"><div class="theme-dot" style="background:#f97316"></div>Orange</button>
+            <button class="theme-btn" onclick="setTheme('cyan')" id="theme-cyan"><div class="theme-dot" style="background:#06b6d4"></div>Cyan</button>
+            <button class="theme-btn" onclick="setTheme('light')" id="theme-light"><div class="theme-dot" style="background:#f5f5f5;border:1px solid #ccc"></div>Light</button>
           </div>
         </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Interface</h3>
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Show Sidebar</div>
-            <div class="setting-desc">Toggle left sidebar visibility</div>
+        <div class="settings-section">
+          <h3>Interface</h3>
+          <div class="setting-row">
+            <div><div class="setting-label">Show Sidebar</div><div class="setting-desc">Toggle left sidebar visibility</div></div>
+            <label class="toggle"><input type="checkbox" checked onchange="toggleSidebar(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
-          <label class="toggle">
-            <input type="checkbox" checked onchange="toggleSidebar(this.checked)">
-            <div class="toggle-track"></div>
-            <div class="toggle-thumb"></div>
-          </label>
-        </div>
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Compact Mode</div>
-            <div class="setting-desc">Reduce padding and spacing</div>
+          <div class="setting-row">
+            <div><div class="setting-label">Compact Mode</div><div class="setting-desc">Reduce padding and spacing</div></div>
+            <label class="toggle"><input type="checkbox" onchange="toggleCompact(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
           </div>
-          <label class="toggle">
-            <input type="checkbox" onchange="toggleCompact(this.checked)">
-            <div class="toggle-track"></div>
-            <div class="toggle-thumb"></div>
-          </label>
         </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>About</h3>
-        <div class="about-box">
-          <div>System: <span>bmatterOS</span></div>
-          <div>Version: <span>v1.0.0</span></div>
-          <div>Engine: <span>Chromium / PWA</span></div>
-          <div>Cloak: <span>about:blank injector</span></div>
-          <div>Hosting: <span>Cloudflare Pages</span></div>
+        <div class="settings-section">
+          <h3>About</h3>
+          <div class="about-box">
+            <div>System: <span>bmatterOS</span></div>
+            <div>Version: <span>v1.0.0</span></div>
+            <div>Engine: <span>Chromium / PWA</span></div>
+            <div>Cloak: <span>about:blank injector</span></div>
+            <div>Hosting: <span>Cloudflare Pages</span></div>
+          </div>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- GAME OVERLAY -->
 <div id="game-overlay">
   <div class="overlay-bar">
     <div class="overlay-title" id="overlay-title">Game</div>
     <button class="overlay-close" onclick="closeGame()">✕ Close</button>
   </div>
-  <div id="game-content" style="flex:1;overflow:hidden;">
-    <!-- iframe or built-in game rendered here -->
-  </div>
+  <div id="game-content" style="flex:1;overflow:hidden;"></div>
 </div>
 
 <script>
 const GAMES = [
-  {
-    id: 'tictactoe',
-    name: 'Tic-Tac-Toe',
-    emoji: '⚔️',
-    tag: 'built-in',
-    type: 'builtin',
-    desc: 'Classic X vs O strategy game'
-  },
-  // ADD MORE GAMES HERE LATER:
-  // { id: 'drifthunters', name: 'Drift Hunters', emoji: '🚗', tag: 'racing', type: 'iframe', url: 'https://...' },
+  { id:'tictactoe', name:'Tic-Tac-Toe', emoji:'⚔️', tag:'built-in', type:'builtin', desc:'Classic X vs O strategy game' },
 ];
 
-let currentTab = 'home';
-let scores = { X: 0, O: 0, draws: 0 };
+let scores = { X:0, O:0, draws:0 };
 
 function switchTab(tab) {
-  currentTab = tab;
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.topnav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
-  document.querySelectorAll('.topnav-btn').forEach(b => {
-    if (b.textContent.toLowerCase() === tab) b.classList.add('active');
-  });
+  document.querySelectorAll('.topnav-btn').forEach(b => { if(b.textContent.toLowerCase()===tab) b.classList.add('active'); });
   buildSidebar(tab);
-  if (tab === 'games') document.getElementById('searchbox').style.display = '';
-  else document.getElementById('searchbox').style.display = 'none';
+  document.getElementById('searchbox').style.display = tab==='games' ? '' : 'none';
 }
 
 function buildSidebar(tab) {
   const s = document.getElementById('sidebar-content');
   s.innerHTML = '';
-  if (tab === 'home') {
-    s.innerHTML = `
-      <div class="sidebar-label">Navigation</div>
+  if(tab==='home') {
+    s.innerHTML = `<div class="sidebar-label">Navigation</div>
       <div class="sidebar-item active" onclick="switchTab('home')"><div class="sidebar-dot"></div>Home</div>
       <div class="sidebar-item" onclick="switchTab('games')"><div class="sidebar-dot"></div>Games</div>
-      <div class="sidebar-item" onclick="switchTab('settings')"><div class="sidebar-dot"></div>Settings</div>
-    `;
-  } else if (tab === 'games') {
-    let html = '<div class="sidebar-label">Categories</div>';
-    html += `<div class="sidebar-item active"><div class="sidebar-dot"></div>All Games</div>`;
-    html += `<div class="sidebar-item"><div class="sidebar-dot"></div>Built-in</div>`;
-    html += `<div class="sidebar-item"><div class="sidebar-dot"></div>Arcade</div>`;
-    html += `<div class="sidebar-item"><div class="sidebar-dot"></div>Racing</div>`;
-    html += `<div class="sidebar-item"><div class="sidebar-dot"></div>Shooting</div>`;
-    s.innerHTML = html;
-  } else if (tab === 'settings') {
-    s.innerHTML = `
-      <div class="sidebar-label">Settings</div>
+      <div class="sidebar-item" onclick="switchTab('settings')"><div class="sidebar-dot"></div>Settings</div>`;
+  } else if(tab==='games') {
+    s.innerHTML = `<div class="sidebar-label">Categories</div>
+      <div class="sidebar-item active"><div class="sidebar-dot"></div>All Games</div>
+      <div class="sidebar-item"><div class="sidebar-dot"></div>Built-in</div>
+      <div class="sidebar-item"><div class="sidebar-dot"></div>Arcade</div>
+      <div class="sidebar-item"><div class="sidebar-dot"></div>Racing</div>`;
+  } else if(tab==='settings') {
+    s.innerHTML = `<div class="sidebar-label">Settings</div>
       <div class="sidebar-item active"><div class="sidebar-dot"></div>Appearance</div>
       <div class="sidebar-item"><div class="sidebar-dot"></div>Interface</div>
-      <div class="sidebar-item"><div class="sidebar-dot"></div>About</div>
-    `;
+      <div class="sidebar-item"><div class="sidebar-dot"></div>About</div>`;
   }
 }
 
 function buildGamesGrid(filter) {
   const grid = document.getElementById('games-grid');
-  const filtered = filter
-    ? GAMES.filter(g => g.name.toLowerCase().includes(filter.toLowerCase()))
-    : GAMES;
-  grid.innerHTML = filtered.map(g => `
-    <div class="game-card" onclick="openGame('${g.id}')">
-      <div class="game-thumb">${g.emoji}</div>
-      <div class="game-info">
-        <div class="game-name">${g.name}</div>
-        <div class="game-tag">${g.tag}</div>
-      </div>
-    </div>
-  `).join('');
+  const list = filter ? GAMES.filter(g => g.name.toLowerCase().includes(filter.toLowerCase())) : GAMES;
+  grid.innerHTML = list.map(g => `<div class="game-card" onclick="openGame('${g.id}')"><div class="game-thumb">${g.emoji}</div><div class="game-info"><div class="game-name">${g.name}</div><div class="game-tag">${g.tag}</div></div></div>`).join('');
 }
 
 function buildFeatured() {
-  const grid = document.getElementById('featured-grid');
-  grid.innerHTML = GAMES.slice(0,4).map(g => `
-    <div class="featured-card" onclick="switchTab('games');openGame('${g.id}')">
-      <div class="featured-icon">${g.emoji}</div>
-      <div class="featured-name">${g.name}</div>
-      <div class="featured-desc">${g.desc}</div>
-    </div>
-  `).join('');
+  document.getElementById('featured-grid').innerHTML = GAMES.slice(0,4).map(g =>
+    `<div class="featured-card" onclick="switchTab('games');openGame('${g.id}')"><div class="featured-icon">${g.emoji}</div><div class="featured-name">${g.name}</div><div class="featured-desc">${g.desc}</div></div>`
+  ).join('');
 }
 
-function filterGames(val) {
-  buildGamesGrid(val);
-}
+function filterGames(val) { buildGamesGrid(val); }
 
 function openGame(id) {
-  const game = GAMES.find(g => g.id === id);
-  if (!game) return;
+  const game = GAMES.find(g => g.id===id); if(!game) return;
   document.getElementById('overlay-title').textContent = game.name;
   const content = document.getElementById('game-content');
-  if (game.type === 'iframe') {
-    content.innerHTML = `<iframe src="${game.url}" style="width:100%;height:100%;border:none;" allowfullscreen></iframe>`;
-  } else if (game.type === 'builtin' && id === 'tictactoe') {
-    content.innerHTML = buildTTT();
-    initTTT();
-  }
+  if(game.type==='iframe') content.innerHTML = `<iframe src="${game.url}" style="width:100%;height:100%;border:none;" allowfullscreen></iframe>`;
+  else if(id==='tictactoe') { content.innerHTML = buildTTT(); initTTT(); }
   document.getElementById('game-overlay').classList.add('open');
 }
 
@@ -945,95 +314,81 @@ function closeGame() {
   document.getElementById('game-content').innerHTML = '';
 }
 
-// TIC TAC TOE
 function buildTTT() {
-  return `
-    <div class="ttt-wrap">
-      <div class="score-row">
-        X wins: <span id="sx">0</span>
-        &nbsp;·&nbsp;
-        O wins: <span id="so">0</span>
-        &nbsp;·&nbsp;
-        Draws: <span id="sd">0</span>
-      </div>
-      <div class="ttt-status" id="ttt-status">Your turn — <span>X</span></div>
-      <div class="ttt-board" id="ttt-board">
-        ${Array(9).fill(0).map((_,i) => `<div class="ttt-cell" id="c${i}" onclick="tttClick(${i})"></div>`).join('')}
-      </div>
-      <button class="ttt-reset" onclick="tttReset()">New Game</button>
-    </div>
-  `;
+  return `<div class="ttt-wrap">
+    <div class="score-row">X wins: <span id="sx">0</span> &nbsp;·&nbsp; O wins: <span id="so">0</span> &nbsp;·&nbsp; Draws: <span id="sd">0</span></div>
+    <div class="ttt-status" id="ttt-status">Your turn — <span>X</span></div>
+    <div class="ttt-board">${Array(9).fill(0).map((_,i)=>`<div class="ttt-cell" id="c${i}" onclick="tttClick(${i})"></div>`).join('')}</div>
+    <button class="ttt-reset" onclick="tttReset()">New Game</button>
+  </div>`;
 }
 
 let tttBoard, tttTurn, tttDone;
 const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
 function initTTT() {
-  tttBoard = Array(9).fill('');
-  tttTurn = 'X';
-  tttDone = false;
-  // restore scores
-  const sx = document.getElementById('sx');
-  const so = document.getElementById('so');
-  const sd = document.getElementById('sd');
-  if (sx) { sx.textContent = scores.X; so.textContent = scores.O; sd.textContent = scores.draws; }
+  tttBoard=Array(9).fill(''); tttTurn='X'; tttDone=false;
+  const sx=document.getElementById('sx'); if(sx){sx.textContent=scores.X;document.getElementById('so').textContent=scores.O;document.getElementById('sd').textContent=scores.draws;}
 }
 
 function tttClick(i) {
-  if (tttDone || tttBoard[i]) return;
-  tttBoard[i] = tttTurn;
-  const cell = document.getElementById('c' + i);
-  cell.textContent = tttTurn;
-  cell.classList.add('filled', tttTurn.toLowerCase());
-
-  const win = WINS.find(w => w.every(j => tttBoard[j] === tttTurn));
-  if (win) {
-    win.forEach(j => document.getElementById('c' + j).classList.add('win'));
-    document.getElementById('ttt-status').innerHTML = `<span>${tttTurn}</span> wins!`;
-    scores[tttTurn]++;
-    document.getElementById('s' + tttTurn.toLowerCase()).textContent = scores[tttTurn];
-    tttDone = true;
-    return;
-  }
-  if (tttBoard.every(c => c)) {
-    document.getElementById('ttt-status').innerHTML = `Draw!`;
-    scores.draws++;
-    document.getElementById('sd').textContent = scores.draws;
-    tttDone = true;
-    return;
-  }
-  tttTurn = tttTurn === 'X' ? 'O' : 'X';
-  document.getElementById('ttt-status').innerHTML = `Your turn — <span>${tttTurn}</span>`;
+  if(tttDone||tttBoard[i]) return;
+  tttBoard[i]=tttTurn;
+  const cell=document.getElementById('c'+i);
+  cell.textContent=tttTurn; cell.classList.add('filled',tttTurn.toLowerCase());
+  const win=WINS.find(w=>w.every(j=>tttBoard[j]===tttTurn));
+  if(win){win.forEach(j=>document.getElementById('c'+j).classList.add('win'));document.getElementById('ttt-status').innerHTML=`<span>${tttTurn}</span> wins!`;scores[tttTurn]++;document.getElementById('s'+tttTurn.toLowerCase()).textContent=scores[tttTurn];tttDone=true;return;}
+  if(tttBoard.every(c=>c)){document.getElementById('ttt-status').innerHTML='Draw!';scores.draws++;document.getElementById('sd').textContent=scores.draws;tttDone=true;return;}
+  tttTurn=tttTurn==='X'?'O':'X';
+  document.getElementById('ttt-status').innerHTML=`Your turn — <span>${tttTurn}</span>`;
 }
 
 function tttReset() {
-  tttBoard = Array(9).fill('');
-  tttTurn = 'X';
-  tttDone = false;
-  for (let i = 0; i < 9; i++) {
-    const c = document.getElementById('c' + i);
-    if (c) { c.textContent = ''; c.className = 'ttt-cell'; c.onclick = () => tttClick(i); }
-  }
-  document.getElementById('ttt-status').innerHTML = `Your turn — <span>X</span>`;
+  tttBoard=Array(9).fill(''); tttTurn='X'; tttDone=false;
+  for(let i=0;i<9;i++){const c=document.getElementById('c'+i);if(c){c.textContent='';c.className='ttt-cell';c.onclick=()=>tttClick(i);}}
+  document.getElementById('ttt-status').innerHTML='Your turn — <span>X</span>';
 }
 
-// SETTINGS
 function setTheme(theme) {
-  document.body.setAttribute('data-theme', theme === 'red' ? '' : theme);
-  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('theme-' + theme).classList.add('active');
-  try { localStorage.setItem('bmos-theme', theme); } catch(e) {}
+  document.body.setAttribute('data-theme',theme==='red'?'':theme);
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('theme-'+theme).classList.add('active');
+  try{localStorage.setItem('bmos-theme',theme);}catch(e){}
 }
 
-function toggleSidebar(on) {
-  document.getElementById('sidebar').style.display = on ? '' : 'none';
-}
-
+function toggleSidebar(on) { document.getElementById('sidebar').style.display=on?'':'none'; }
 function toggleCompact(on) {
-  document.body.style.setProperty('--topbar-h', on ? '40px' : '48px');
-  document.querySelectorAll('.tab-panel').forEach(p => {
-    p.style.padding = on ? '1rem' : '1.5rem';
-  });
+  document.body.style.setProperty('--topbar-h',on?'40px':'48px');
+  document.querySelectorAll('.tab-panel').forEach(p=>{p.style.padding=on?'1rem':'1.5rem';});
+}
+
+// TERMINAL LOADER
+const tlContent = document.getElementById('tl-content');
+const tlDelay = ms => new Promise(r => setTimeout(r, ms));
+function tlAdd(html) {
+  const d = document.createElement('div'); d.className='tl'; d.innerHTML=html;
+  tlContent.appendChild(d);
+  document.getElementById('terminal-loader').scrollTop = 99999;
+}
+
+const TL_ITEMS = ['core.sys','renderer.js','theme.engine','sidebar.nav','games.registry','tictactoe.mod','settings.cfg','ui.framework','session.init','cloak.ready'];
+
+async function runLoader() {
+  tlAdd('bmatterOS Terminal [v1.0.0]');
+  tlAdd('(c) bmatterOS. All rights reserved.<br>');
+  await tlDelay(100);
+  tlAdd(`C:\\Users\\bmatter&gt; <span class="tl-red">bmatteros --init</span>`);
+  await tlDelay(150);
+  tlAdd('Initializing system modules...<br>');
+  for(const item of TL_ITEMS) {
+    await tlDelay(150);
+    tlAdd(`FETCHED [${item}] -&gt; <span class="tl-red">READY</span>`);
+  }
+  await tlDelay(300);
+  tlAdd('<br><span class="tl-red">All systems ready. Starting bmatterOS...</span>');
+  await tlDelay(400);
+  document.getElementById('terminal-loader').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
 }
 
 // INIT
@@ -1042,11 +397,8 @@ function toggleCompact(on) {
   buildFeatured();
   buildSidebar('home');
   document.getElementById('searchbox').style.display = 'none';
-
-  try {
-    const saved = localStorage.getItem('bmos-theme');
-    if (saved) setTheme(saved);
-  } catch(e) {}
+  try { const s=localStorage.getItem('bmos-theme'); if(s) setTheme(s); } catch(e) {}
+  runLoader();
 })();
 </script>
 </body>
