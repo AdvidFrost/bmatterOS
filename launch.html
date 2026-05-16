@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bmatterOS</title>
+<meta name="theme-color" content="#0a0a0a">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-family: 'Courier New', monospace;
+    color: #e53e3e;
+    overflow: hidden;
+    user-select: none;
+  }
+  .boot { text-align: center; }
+  .logo {
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    color: #e53e3e;
+    text-shadow: 0 0 30px rgba(229,62,62,0.4);
+    margin-bottom: 0.4rem;
+  }
+  .version {
+    font-size: 0.72rem;
+    color: #444;
+    letter-spacing: 0.2em;
+    margin-bottom: 2.5rem;
+  }
+  .terminal {
+    width: 400px;
+    text-align: left;
+    font-size: 0.76rem;
+    line-height: 1.85;
+  }
+  .fetched { color: #555; }
+  .ready { color: #e53e3e; }
+  .bar-wrap { width: 400px; margin: 1.5rem auto 0; }
+  .bar { height: 1px; background: #1c1c1c; overflow: hidden; }
+  .bar-fill {
+    height: 100%;
+    background: #e53e3e;
+    width: 0%;
+    transition: width 0.15s linear;
+    box-shadow: 0 0 6px rgba(229,62,62,0.5);
+  }
+  .bar-label { font-size: 0.65rem; color: #333; margin-top: 0.5rem; letter-spacing: 0.1em; }
+  .launch-prompt {
+    display: none;
+    margin-top: 2rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .launch-prompt.show { display: flex; }
+  .launch-btn {
+    background: none;
+    border: 1px solid #e53e3e;
+    color: #e53e3e;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    padding: 0.6rem 2rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .launch-btn:hover {
+    background: rgba(229,62,62,0.1);
+    box-shadow: 0 0 16px rgba(229,62,62,0.3);
+  }
+  .launch-note { font-size: 0.65rem; color: #333; letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+<div class="boot">
+  <div class="logo">bmatterOS</div>
+  <div class="version">v1.0.0 — initializing</div>
+  <div class="terminal" id="terminal"></div>
+  <div class="bar-wrap">
+    <div class="bar"><div class="bar-fill" id="bar"></div></div>
+    <div class="bar-label" id="bar-label">loading modules...</div>
+  </div>
+  <div class="launch-prompt" id="launch-prompt">
+    <button class="launch-btn" onclick="launchApp()">► Launch</button>
+    <div class="launch-note">click to open bmatterOS</div>
+  </div>
+</div>
+
+<script>
+const items = [
+  'core.sys','renderer.js','theme.engine',
+  'sidebar.nav','games.registry','tictactoe.mod',
+  'settings.cfg','ui.framework','session.init','cloak.ready'
+];
+
+const terminal = document.getElementById('terminal');
+const bar = document.getElementById('bar');
+const barLabel = document.getElementById('bar-label');
+let i = 0;
+let appHTML = null;
+
+fetch('/app.html')
+  .then(r => r.text())
+  .then(html => { appHTML = html; })
+  .catch(() => { appHTML = null; });
+
+function addLine() {
+  if (i < items.length) {
+    const div = document.createElement('div');
+    div.innerHTML = `<span class="fetched">FETCHED [${items[i]}] → </span><span class="ready">READY</span>`;
+    terminal.appendChild(div);
+    bar.style.width = ((i + 1) / items.length * 90) + '%';
+    i++;
+    setTimeout(addLine, 160);
+  } else {
+    bar.style.width = '100%';
+    barLabel.textContent = 'all systems ready.';
+    setTimeout(() => {
+      document.getElementById('launch-prompt').classList.add('show');
+    }, 300);
+  }
+}
+
+function launchApp() {
+  if (!appHTML) {
+    window.open('/app.html', '_blank');
+    return;
+  }
+  const popup = window.open('', '_blank',
+    'width=' + screen.availWidth +
+    ',height=' + screen.availHeight +
+    ',left=0,top=0,toolbar=no,menubar=no,scrollbars=no,resizable=yes'
+  );
+  if (!popup || popup.closed) {
+    window.location.href = '/app.html';
+    return;
+  }
+  popup.document.open();
+  popup.document.write(appHTML);
+  popup.document.close();
+}
+
+setTimeout(addLine, 400);
+</script>
+</body>
+</html>
