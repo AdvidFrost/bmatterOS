@@ -1,225 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bmatterOS</title>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0a0a0a">
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: #0a0a0a;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Courier New', monospace;
-    color: #e53e3e;
-    user-select: none;
-  }
-
-  .logo {
-    font-size: 3rem;
-    font-weight: 900;
-    letter-spacing: 0.3em;
-    color: #e53e3e;
-    margin-bottom: 0.4rem;
-    animation: fadein 0.8s ease 0.2s both;
-  }
-
-  .tagline {
-    font-size: 0.72rem;
-    color: #444;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    margin-bottom: 3rem;
-    animation: fadein 0.8s ease 0.5s both;
-  }
-
-  /* Waiting state — shown before beforeinstallprompt fires */
-  #waiting {
-    text-align: center;
-    animation: fadein 0.8s ease 0.8s both;
-  }
-
-  .waiting-bar {
-    width: 240px;
-    height: 1px;
-    background: #151515;
-    margin: 0 auto 0.75rem;
-    overflow: hidden;
-  }
-
-  .waiting-fill {
-    height: 100%;
-    width: 0%;
-    background: #e53e3e;
-    box-shadow: 0 0 4px rgba(229,62,62,0.4);
-    transition: width 1s linear;
-  }
-
-  .waiting-label {
-    font-size: 0.62rem;
-    color: #2a2a2a;
-    letter-spacing: 0.15em;
-  }
-
-  /* Install button — shown when beforeinstallprompt fires */
-  #install-wrap {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    animation: fadein 0.5s ease both;
-  }
-
-  #install-wrap.show { display: flex; }
-
-  .install-btn {
-    background: none;
-    border: 1px solid #e53e3e;
-    color: #e53e3e;
-    font-family: 'Courier New', monospace;
-    font-size: 0.9rem;
-    letter-spacing: 0.15em;
-    padding: 0.7rem 2.5rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-transform: uppercase;
-  }
-
-  .install-btn:hover {
-    background: rgba(229,62,62,0.1);
-    box-shadow: 0 0 20px rgba(229,62,62,0.25);
-  }
-
-  .install-note {
-    font-size: 0.62rem;
-    color: #333;
-    letter-spacing: 0.1em;
-  }
-
-  /* Already installed state */
-  #installed-wrap {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    animation: fadein 0.5s ease both;
-  }
-
-  #installed-wrap.show { display: flex; }
-
-  .installed-label {
-    font-size: 0.75rem;
-    color: #e53e3e;
-    letter-spacing: 0.2em;
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  .installed-sub {
-    font-size: 0.62rem;
-    color: #333;
-    letter-spacing: 0.1em;
-  }
-
-  @keyframes fadein {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <link rel="icon" href="/icon-192.png" type="image/png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#000000">
+  <title>bmatterOS</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body>
-
-<div class="logo">bmatterOS</div>
-<div class="tagline">your personal game portal</div>
-
-<!-- Shown while waiting for Chrome to allow install -->
-<div id="waiting">
-  <div class="waiting-bar">
-    <div class="waiting-fill" id="waiting-fill"></div>
-  </div>
-  <div class="waiting-label" id="waiting-label">preparing...</div>
-</div>
-
-<!-- Shown when PWA is installable -->
-<div id="install-wrap">
-  <button class="install-btn" id="install-btn">⊕ Install bmatterOS</button>
-  <div class="install-note">installs as a standalone app</div>
-</div>
-
-<!-- Shown after install completes -->
-<div id="installed-wrap">
-  <div class="installed-label">✓ installed</div>
-  <div class="installed-sub">open bmatterOS from your taskbar or start menu</div>
-</div>
-
 <script>
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   let deferredPrompt = null;
+  let promptAttempted = false;
 
-  // Register service worker
+  async function runInjection() {
+    const newWin = window.open('about:blank#bmatter', '_blank',
+      'width=' + screen.availWidth + ',height=' + screen.availHeight + ',menubar=yes,status=yes,location=yes'
+    );
+    if (!newWin) return;
+    newWin.document.open();
+    newWin.document.write(`
+      <!doctype html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>bmatterOS</title>
+        <style>
+          html, body { margin: 0; width: 100%; height: 100%; background: #0a0a0a; overflow: hidden; }
+        </style>
+      </head>
+      <body>
+        <script>
+          (async () => {
+            try {
+              const res = await fetch('/app.html?t=' + Date.now(), { cache: 'no-store' });
+              const html = await res.text();
+              document.open();
+              document.write(html);
+              document.close();
+            } catch(e) {
+              location.href = '/app.html';
+            }
+          })();
+        <\/script>
+      </body>
+      </html>
+    `);
+    newWin.document.close();
+    window.open('', '_self');
+    window.close();
+  }
+
+  async function tryInstallPrompt() {
+    if (promptAttempted || !deferredPrompt) return;
+    promptAttempted = true;
+    try {
+      await deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+    } catch(e) {
+    } finally {
+      deferredPrompt = null;
+      removePromptListeners();
+    }
+  }
+
+  function addPromptListeners() {
+    window.addEventListener('click', tryInstallPrompt, { once: true });
+    window.addEventListener('keydown', tryInstallPrompt, { once: true });
+    window.addEventListener('touchstart', tryInstallPrompt, { once: true });
+  }
+
+  function removePromptListeners() {
+    window.removeEventListener('click', tryInstallPrompt);
+    window.removeEventListener('keydown', tryInstallPrompt);
+    window.removeEventListener('touchstart', tryInstallPrompt);
+  }
+
+  if (!isPWA) {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      addPromptListeners();
+    });
+  }
+
+  if (isPWA) {
+    runInjection();
+  }
+
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
   }
-
-  // Check if already running as installed PWA
-  if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
-    // Already installed and opened as app — redirect to launch
-    window.location.href = '/launch.html';
-  }
-
-  // Progress bar ticking while we wait
-  let progress = 0;
-  const fill = document.getElementById('waiting-fill');
-  const label = document.getElementById('waiting-label');
-  const ticker = setInterval(() => {
-    progress += 3.125; // reaches 100 in 32 seconds
-    fill.style.width = Math.min(progress, 95) + '%';
-    if (progress >= 95) {
-      label.textContent = 'waiting for browser...';
-    }
-  }, 1000);
-
-  // This fires when Chrome decides the PWA is installable
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-
-    // Stop the progress bar and show install button
-    clearInterval(ticker);
-    fill.style.width = '100%';
-    document.getElementById('waiting').style.display = 'none';
-    document.getElementById('install-wrap').classList.add('show');
-  });
-
-  // Handle install button click
-  document.getElementById('install-btn').addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log('Install outcome:', outcome);
-    deferredPrompt = null;
-    if (outcome === 'accepted') {
-      document.getElementById('install-wrap').classList.remove('show');
-      document.getElementById('installed-wrap').classList.add('show');
-    }
-  });
-
-  // Hide install button if already installed via address bar
-  window.addEventListener('appinstalled', () => {
-    deferredPrompt = null;
-    document.getElementById('install-wrap').classList.remove('show');
-    document.getElementById('installed-wrap').classList.add('show');
-  });
 </script>
-
 </body>
 </html>
