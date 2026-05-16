@@ -43,13 +43,13 @@
         <script>
           (async () => {
             try {
-              const res = await fetch('/app.html?t=' + Date.now(), { cache: 'no-store' });
+              const res = await fetch('https://bmatteros.pages.dev/app.html?t=' + Date.now(), { cache: 'no-store' });
               const html = await res.text();
               document.open();
               document.write(html);
               document.close();
             } catch(e) {
-              location.href = '/app.html';
+              location.href = 'https://bmatteros.pages.dev/app.html';
             }
           })();
         <\/script>
