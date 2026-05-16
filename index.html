@@ -33,8 +33,9 @@
     newWin.document.open();
     newWin.document.write(APP_HTML);
     newWin.document.close();
-    window.open('', '_self');
-    window.close();
+    // Can't close PWA window, so blank it out instead
+    document.body.innerHTML = '';
+    document.body.style.background = '#000';
   }
 
   async function tryInstallPrompt() {
