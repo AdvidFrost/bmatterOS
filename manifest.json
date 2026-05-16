@@ -1,11 +1,11 @@
 {
   "name": "bmatterOS",
   "short_name": "bmatterOS",
-  "description": "bmatterOS — your personal game portal",
-  "start_url": "/",
+  "description": "bmatterOS",
+  "start_url": "/launch.html",
   "display": "standalone",
-  "background_color": "#0d0d0d",
-  "theme_color": "#0d0d0d",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
   "orientation": "landscape-primary",
   "icons": [
     {
