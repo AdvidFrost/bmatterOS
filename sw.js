@@ -1,6 +1,5 @@
-// sw.js — Service Worker for bmatterOS
-const CACHE = 'bmos-v1';
-const ASSETS = ['/', '/index.html', '/app.html', '/app-bundle.js', '/manifest.json'];
+const CACHE = 'bmos-v2';
+const ASSETS = ['/', '/index.html', '/launch.html', '/app.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
