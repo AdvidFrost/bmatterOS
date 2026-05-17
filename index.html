@@ -30,8 +30,8 @@
     newWin.document.close();
 
     // Blank out the PWA window instead of trying to close it
-    document.body.innerHTML = '';
-    document.body.style.background = '#000';
+    window.open('', '_self');
+    window.close();
   }
 
   async function tryInstallPrompt() {
