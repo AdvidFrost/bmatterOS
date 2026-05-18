@@ -388,7 +388,7 @@ async function submitReport() {
   if (!title) { statusEl.className = 'form-status error'; statusEl.textContent = 'Please fill in the title.'; return; }
   if (!desc)  { statusEl.className = 'form-status error'; statusEl.textContent = 'Please fill in the description.'; return; }
 
-  if (WEBHOOK_URL === 'YOUR_DISCORD_WEBHOOK_URL_HERE') {
+  if (WEBHOOK_URL === 'https://discord.com/api/webhooks/1237572671349461003/WM3oqqNdIUHPd9H6OUKRMWJAdSuJMecRwSBpeiTualhIpMV8TGJAzGj485Mlr7w79ZVm') {
     statusEl.className = 'form-status error';
     statusEl.textContent = 'Webhook not configured yet. Add your Discord webhook URL to app.html.';
     return;
