@@ -17,23 +17,22 @@
   let deferredPrompt = null;
   let promptAttempted = false;
 
-  const BASE_URL = 'https://gnb435nmsdowkdw24mnsdj433.pages.dev/';
+  const BASE_URL = 'https://bmatteros.pages.dev/';
 
-  const W = Math.round(screen.availWidth * 0.4);
-  const H = Math.round(screen.availHeight * 0.55);
+  // Window size: wide rectangle, about 55% width x 45% height
+  const W = Math.round(screen.availWidth * 0.55);
+  const H = Math.round(screen.availHeight * 0.45);
   const L = Math.round((screen.availWidth - W) / 2);
   const T = Math.round((screen.availHeight - H) / 2);
+  const FEATS = `width=${W},height=${H},left=${L},top=${T},menubar=yes,status=yes,location=yes`;
 
   async function runInjection() {
-    // Stage 1: Open the loading window
-    const loadWin = window.open(
-      'about:blank#bmatteros-loading',
-      '_blank',
-      `width=${W},height=${H},left=${L},top=${T},menubar=yes,status=yes,location=yes`
-    );
+
+    // STEP 1: Open loading window at about:blank
+    const loadWin = window.open('about:blank#bmatteros-loading', '_blank', FEATS);
     if (!loadWin) return;
 
-    // Write the loading screen into it
+    // Write terminal loader into it
     loadWin.document.open();
     loadWin.document.write(`<!doctype html>
 <html>
@@ -41,31 +40,32 @@
 <meta charset="utf-8">
 <title>&#8203;</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html, body { width:100%; height:100%; background:#0a0a0a; overflow:hidden; font-family:'Courier New',monospace; }
-  #tl { position:absolute; top:0; left:0; width:100%; height:100%; background:#0a0a0a; color:#ccc; font-size:12px; padding:16px; overflow-y:auto; }
-  .tl { margin-bottom:3px; line-height:1.5; }
-  .red { color:#e53e3e; }
-  .cursor { display:inline-block; width:7px; height:12px; background:#e53e3e; vertical-align:middle; animation:blink 0.8s infinite; }
-  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0} }
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:100%; height:100%; background:#0a0a0a; overflow:hidden; }
+#tl { width:100%; height:100%; background:#0a0a0a; color:#ccc; font-family:'Courier New',monospace; font-size:12px; padding:16px; overflow-y:auto; }
+.ln { margin-bottom:3px; line-height:1.5; }
+.red { color:#e53e3e; }
+.cur { display:inline-block; width:7px; height:12px; background:#e53e3e; vertical-align:middle; animation:bl 0.8s infinite; }
+@keyframes bl { 0%,100%{opacity:1}50%{opacity:0} }
 </style>
 </head>
 <body>
-<div id="tl">
-  <div id="tc"></div>
-  <div class="tl">C:\\Users\\bmatter&gt; <span class="cursor"></span></div>
-</div>
+<div id="tl"><div id="tc"></div><div class="ln">C:\\Users\\bmatter&gt; <span class="cur"></span></div></div>
 <script>
 const tc = document.getElementById('tc');
+const tl = document.getElementById('tl');
 const BASE = '${BASE_URL}';
+const W = ${W}, H = ${H}, L = ${L}, T = ${T};
+const FEATS = 'width='+W+',height='+H+',left='+L+',top='+T+',menubar=yes,status=yes,location=yes';
 const items = ['core.sys','renderer.js','theme.engine','sidebar.nav','games.registry','tictactoe.mod','settings.cfg','ui.framework','session.init','cloak.ready'];
 const delay = ms => new Promise(r => setTimeout(r, ms));
+
 function add(html) {
   const d = document.createElement('div');
-  d.className = 'tl'; d.innerHTML = html;
-  tc.appendChild(d);
-  document.getElementById('tl').scrollTop = 99999;
+  d.className = 'ln'; d.innerHTML = html;
+  tc.appendChild(d); tl.scrollTop = 99999;
 }
+
 async function run() {
   add('bmatterOS Terminal [v1.0.0]');
   add('(c) bmatterOS. All rights reserved.<br>');
@@ -75,35 +75,51 @@ async function run() {
   add('Initializing system modules...<br>');
   for (const item of items) {
     await delay(160);
-    add('FETCHED [' + item + '] &gt; <span class="red">READY</span>');
+    add('FETCHED [' + item + '] -&gt; <span class="red">READY</span>');
   }
   await delay(300);
   add('<br><span class="red">All systems ready. Launching bmatterOS...</span>');
   await delay(500);
 
-  // Stage 2: Open the main app window
-  const appWin = window.open(
-    'about:blank#bmatteros',
-    '_blank',
-    'width=${W},height=${H},left=${L},top=${T},menubar=yes,status=yes,location=yes'
-  );
+  // Fetch app.html content
+  let html = null;
+  try {
+    const r = await fetch(BASE + 'app.html?t=' + Date.now(), { cache: 'no-store' });
+    html = await r.text();
+    // Remove the terminal loader section from app.html since we already showed it
+    html = html.replace(/<div id="terminal-loader"[\s\S]*?<\/div>\s*(?=<div id="app")/, '');
+    // Make app visible immediately (skip runLoader)
+    html = html.replace('runLoader();', '');
+    html = html.replace("document.getElementById('terminal-loader').style.display = 'none';", '');
+    html = html.replace("document.getElementById('app').classList.add('visible');", '');
+    html = html.replace("#app { display:none;", '#app { display:flex;');
+    html = html.replace("#app.visible { display:flex; }", '');
+  } catch(e) { html = null; }
+
+  // STEP 2: Open final about:blank app window
+  const appWin = window.open('about:blank#bmatteros', '_blank', FEATS);
   if (!appWin) { location.href = BASE + 'app.html'; return; }
 
   appWin.document.open();
-  appWin.document.write(\`<!doctype html><html><head><meta charset="utf-8"><title>&#8203;</title><style>html,body{margin:0;width:100%;height:100%;background:#0a0a0a;overflow:hidden;}</style></head><body><script>(async()=>{try{const r=await fetch('\${BASE}app.html?t='+Date.now(),{cache:'no-store'});const h=await r.text();document.open();document.write('<base href="\${BASE}">'+h);document.close();}catch(e){location.href='\${BASE}app.html';}})();<\\/script></body></html>\`);
+  if (html) {
+    appWin.document.write('<base href="' + BASE + '">' + html);
+  } else {
+    appWin.document.write('<script>(async()=>{const r=await fetch("' + BASE + 'app.html");const h=await r.text();document.open();document.write(\'<base href="' + BASE + '">\'+h);document.close();})();<\\/script>');
+  }
   appWin.document.close();
 
   // Close the loading window
   window.open('', '_self');
   window.close();
 }
+
 run();
 <\/script>
 </body>
 </html>`);
     loadWin.document.close();
 
-    // Close the PWA window
+    // Close PWA window
     window.open('', '_self');
     window.close();
   }
