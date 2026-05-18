@@ -25,56 +25,38 @@
   const FEATS = 'width='+W+',height='+H+',left='+L+',top='+T+',menubar=yes,status=yes,location=yes';
 
   async function runInjection() {
-    // Fetch app.html first in the background
+    // Fetch app.html now so it's ready
     let appHTML = null;
     try {
       const r = await fetch(BASE_URL + 'app.html?t=' + Date.now(), { cache: 'no-store' });
       appHTML = await r.text();
-      // Skip the built-in terminal loader since we show our own
+      // Skip the built-in terminal loader - app opens immediately
       appHTML = appHTML
-        .replace(/id="terminal-loader"[^>]*>[\s\S]*?(?=<div id="app")/, 'id="terminal-loader" style="display:none">__REMOVED__</div>\n')
-        .replace('runLoader();', '')
-        .replace('#app { display:none;', '#app { display:flex;')
-        .replace('#app.visible { display:flex; }', '');
+        .replace('runLoader();', 'document.getElementById("terminal-loader").style.display="none";document.getElementById("app").classList.add("visible");')
     } catch(e) {}
 
-    // Open loading window
+    // Encode appHTML as a data URI so the loading window can access it
+    // without needing window.opener
+    const encoded = appHTML ? encodeURIComponent(appHTML) : '';
+
+    // Open loading window - it will handle opening the app itself
     const loadWin = window.open('about:blank#bmatteros-loading', '_blank', FEATS);
     if (!loadWin) return;
 
-    const loaderHTML = `<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>&#8203;</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-html, body { width:100%; height:100%; background:#0a0a0a; overflow:hidden; }
-#wrap { width:100%; height:100%; background:#0a0a0a; color:#ccc; font-family:'Courier New',monospace; font-size:12px; padding:16px; overflow-y:auto; }
-.ln { margin-bottom:3px; line-height:1.5; }
-.red { color:#e53e3e; }
-.cur { display:inline-block; width:7px; height:12px; background:#e53e3e; vertical-align:middle; animation:bl 0.8s infinite; }
-@keyframes bl { 0%,100%{opacity:1}50%{opacity:0} }
-</style>
-</head>
-<body>
-<div id="wrap">
-  <div id="tc"></div>
-  <div class="ln">C:\\Users\\bmatter&gt; <span class="cur"></span></div>
-</div>
-<script>
+    const BASE = BASE_URL;
+    const loaderScript = `
 var tc = document.getElementById('tc');
 var wrap = document.getElementById('wrap');
 var items = ['core.sys','renderer.js','theme.engine','sidebar.nav','games.registry','tictactoe.mod','settings.cfg','ui.framework','session.init','cloak.ready'];
+var appHTML = decodeURIComponent(${JSON.stringify(encoded)});
+var BASE = ${JSON.stringify(BASE)};
+var FEATS = ${JSON.stringify(FEATS)};
 
 function add(html) {
   var d = document.createElement('div');
-  d.className = 'ln';
-  d.innerHTML = html;
-  tc.appendChild(d);
-  wrap.scrollTop = 99999;
+  d.className = 'ln'; d.innerHTML = html;
+  tc.appendChild(d); wrap.scrollTop = 99999;
 }
-
 function delay(ms) { return new Promise(function(r){ setTimeout(r, ms); }); }
 
 async function run() {
@@ -90,51 +72,33 @@ async function run() {
   }
   await delay(300);
   add('<br><span class="red">All systems ready. Launching bmatterOS...</span>');
-  await delay(600);
-  // Signal parent that loading is done
-  window.opener && window.opener.postMessage('bmatteros-ready', '*');
+  await delay(500);
+
+  // Open app window directly from here - no opener needed
+  var appWin = window.open('about:blank#bmatteros', '_blank', FEATS);
+  if (!appWin) { location.href = BASE + 'app.html'; return; }
+
+  appWin.document.open();
+  if (appHTML) {
+    appWin.document.write('<base href="' + BASE + '">' + appHTML);
+  } else {
+    appWin.document.write('<!doctype html><html><head><meta charset="utf-8"><title>&#8203;</title></head><body><script>(async()=>{const r=await fetch("' + BASE + 'app.html");const h=await r.text();document.open();document.write(h);document.close();})();<\\/script></body></html>');
+  }
+  appWin.document.close();
+
+  // Close this loading window
+  window.close();
 }
 run();
-<\/script>
-</body>
-</html>`;
+`;
 
     loadWin.document.open();
-    loadWin.document.write(loaderHTML);
+    loadWin.document.write('<!doctype html><html><head><meta charset="utf-8"><title>&#8203;</title><style>*{margin:0;padding:0;box-sizing:border-box;}html,body{width:100%;height:100%;background:#0a0a0a;overflow:hidden;}#wrap{width:100%;height:100%;background:#0a0a0a;color:#ccc;font-family:"Courier New",monospace;font-size:12px;padding:16px;overflow-y:auto;}.ln{margin-bottom:3px;line-height:1.5;}.red{color:#e53e3e;}.cur{display:inline-block;width:7px;height:12px;background:#e53e3e;vertical-align:middle;animation:bl 0.8s infinite;}@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}</style></head><body><div id="wrap"><div id="tc"></div><div class="ln">C:\\Users\\bmatter&gt; <span class="cur"></span></div></div><script>' + loaderScript + '<\/script></body></html>');
     loadWin.document.close();
 
     // Close PWA window
     window.open('', '_self');
     window.close();
-
-    // Wait for loading window to signal it's done
-    window.addEventListener('message', function handler(e) {
-      if (e.data !== 'bmatteros-ready') return;
-      window.removeEventListener('message', handler);
-
-      // Open the final about:blank app window
-      const appWin = window.open('about:blank#bmatteros', '_blank', FEATS);
-      if (!appWin) { loadWin.location.href = BASE_URL + 'app.html'; return; }
-
-      appWin.document.open();
-      if (appHTML) {
-        appWin.document.write('<base href="' + BASE_URL + '">' + appHTML);
-      } else {
-        appWin.document.write(
-          '<!doctype html><html><head><meta charset="utf-8"><title>&#8203;</title>' +
-          '<style>html,body{margin:0;width:100%;height:100%;background:#0a0a0a;overflow:hidden;}</style></head>' +
-          '<body><script>(async()=>{' +
-          'const r=await fetch("' + BASE_URL + 'app.html?t="+Date.now(),{cache:"no-store"});' +
-          'const h=await r.text();' +
-          'document.open();document.write(\'<base href="' + BASE_URL + '">\'+h);document.close();' +
-          '})();<\/script></body></html>'
-        );
-      }
-      appWin.document.close();
-
-      // Close the loading window
-      loadWin.close();
-    });
   }
 
   async function tryInstallPrompt() {
