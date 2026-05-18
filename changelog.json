@@ -1,0 +1,16 @@
+{
+  "version": "v1.0.1",
+  "changelog": [
+    {
+      "ver": "v1.0.1",
+      "date": "Initial-er release",
+      "items": [
+        "Added retrobowl",
+        "Made look cool",
+        "Braedens a bitch",
+        "Added support tab",
+        "Support tab for bug reports and suggestions"
+      ]
+    }
+  ]
+}
