@@ -18,31 +18,39 @@
   let promptAttempted = false;
 
   const BASE_URL = 'https://bmatteros.pages.dev/';
-
-  // Window size: wide rectangle, about 55% width x 45% height
   const W = Math.round(screen.availWidth * 0.55);
   const H = Math.round(screen.availHeight * 0.45);
   const L = Math.round((screen.availWidth - W) / 2);
   const T = Math.round((screen.availHeight - H) / 2);
-  const FEATS = `width=${W},height=${H},left=${L},top=${T},menubar=yes,status=yes,location=yes`;
+  const FEATS = 'width='+W+',height='+H+',left='+L+',top='+T+',menubar=yes,status=yes,location=yes';
 
   async function runInjection() {
+    // Fetch app.html first in the background
+    let appHTML = null;
+    try {
+      const r = await fetch(BASE_URL + 'app.html?t=' + Date.now(), { cache: 'no-store' });
+      appHTML = await r.text();
+      // Skip the built-in terminal loader since we show our own
+      appHTML = appHTML
+        .replace(/id="terminal-loader"[^>]*>[\s\S]*?(?=<div id="app")/, 'id="terminal-loader" style="display:none">__REMOVED__</div>\n')
+        .replace('runLoader();', '')
+        .replace('#app { display:none;', '#app { display:flex;')
+        .replace('#app.visible { display:flex; }', '');
+    } catch(e) {}
 
-    // STEP 1: Open loading window at about:blank
+    // Open loading window
     const loadWin = window.open('about:blank#bmatteros-loading', '_blank', FEATS);
     if (!loadWin) return;
 
-    // Write terminal loader into it
-    loadWin.document.open();
-    loadWin.document.write(`<!doctype html>
+    const loaderHTML = `<!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
 <title>&#8203;</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-html,body { width:100%; height:100%; background:#0a0a0a; overflow:hidden; }
-#tl { width:100%; height:100%; background:#0a0a0a; color:#ccc; font-family:'Courier New',monospace; font-size:12px; padding:16px; overflow-y:auto; }
+html, body { width:100%; height:100%; background:#0a0a0a; overflow:hidden; }
+#wrap { width:100%; height:100%; background:#0a0a0a; color:#ccc; font-family:'Courier New',monospace; font-size:12px; padding:16px; overflow-y:auto; }
 .ln { margin-bottom:3px; line-height:1.5; }
 .red { color:#e53e3e; }
 .cur { display:inline-block; width:7px; height:12px; background:#e53e3e; vertical-align:middle; animation:bl 0.8s infinite; }
@@ -50,21 +58,24 @@ html,body { width:100%; height:100%; background:#0a0a0a; overflow:hidden; }
 </style>
 </head>
 <body>
-<div id="tl"><div id="tc"></div><div class="ln">C:\\Users\\bmatter&gt; <span class="cur"></span></div></div>
+<div id="wrap">
+  <div id="tc"></div>
+  <div class="ln">C:\\Users\\bmatter&gt; <span class="cur"></span></div>
+</div>
 <script>
-const tc = document.getElementById('tc');
-const tl = document.getElementById('tl');
-const BASE = '${BASE_URL}';
-const W = ${W}, H = ${H}, L = ${L}, T = ${T};
-const FEATS = 'width='+W+',height='+H+',left='+L+',top='+T+',menubar=yes,status=yes,location=yes';
-const items = ['core.sys','renderer.js','theme.engine','sidebar.nav','games.registry','tictactoe.mod','settings.cfg','ui.framework','session.init','cloak.ready'];
-const delay = ms => new Promise(r => setTimeout(r, ms));
+var tc = document.getElementById('tc');
+var wrap = document.getElementById('wrap');
+var items = ['core.sys','renderer.js','theme.engine','sidebar.nav','games.registry','tictactoe.mod','settings.cfg','ui.framework','session.init','cloak.ready'];
 
 function add(html) {
-  const d = document.createElement('div');
-  d.className = 'ln'; d.innerHTML = html;
-  tc.appendChild(d); tl.scrollTop = 99999;
+  var d = document.createElement('div');
+  d.className = 'ln';
+  d.innerHTML = html;
+  tc.appendChild(d);
+  wrap.scrollTop = 99999;
 }
+
+function delay(ms) { return new Promise(function(r){ setTimeout(r, ms); }); }
 
 async function run() {
   add('bmatterOS Terminal [v1.0.0]');
@@ -73,55 +84,57 @@ async function run() {
   add('C:\\\\Users\\\\bmatter&gt; <span class="red">bmatteros --init</span>');
   await delay(150);
   add('Initializing system modules...<br>');
-  for (const item of items) {
+  for (var i = 0; i < items.length; i++) {
     await delay(160);
-    add('FETCHED [' + item + '] -&gt; <span class="red">READY</span>');
+    add('FETCHED [' + items[i] + '] -&gt; <span class="red">READY</span>');
   }
   await delay(300);
   add('<br><span class="red">All systems ready. Launching bmatterOS...</span>');
-  await delay(500);
-
-  // Fetch app.html content
-  let html = null;
-  try {
-    const r = await fetch(BASE + 'app.html?t=' + Date.now(), { cache: 'no-store' });
-    html = await r.text();
-    // Remove the terminal loader section from app.html since we already showed it
-    html = html.replace(/<div id="terminal-loader"[\s\S]*?<\/div>\s*(?=<div id="app")/, '');
-    // Make app visible immediately (skip runLoader)
-    html = html.replace('runLoader();', '');
-    html = html.replace("document.getElementById('terminal-loader').style.display = 'none';", '');
-    html = html.replace("document.getElementById('app').classList.add('visible');", '');
-    html = html.replace("#app { display:none;", '#app { display:flex;');
-    html = html.replace("#app.visible { display:flex; }", '');
-  } catch(e) { html = null; }
-
-  // STEP 2: Open final about:blank app window
-  const appWin = window.open('about:blank#bmatteros', '_blank', FEATS);
-  if (!appWin) { location.href = BASE + 'app.html'; return; }
-
-  appWin.document.open();
-  if (html) {
-    appWin.document.write('<base href="' + BASE + '">' + html);
-  } else {
-    appWin.document.write('<script>(async()=>{const r=await fetch("' + BASE + 'app.html");const h=await r.text();document.open();document.write(\'<base href="' + BASE + '">\'+h);document.close();})();<\\/script>');
-  }
-  appWin.document.close();
-
-  // Close the loading window
-  window.open('', '_self');
-  window.close();
+  await delay(600);
+  // Signal parent that loading is done
+  window.opener && window.opener.postMessage('bmatteros-ready', '*');
 }
-
 run();
 <\/script>
 </body>
-</html>`);
+</html>`;
+
+    loadWin.document.open();
+    loadWin.document.write(loaderHTML);
     loadWin.document.close();
 
     // Close PWA window
     window.open('', '_self');
     window.close();
+
+    // Wait for loading window to signal it's done
+    window.addEventListener('message', function handler(e) {
+      if (e.data !== 'bmatteros-ready') return;
+      window.removeEventListener('message', handler);
+
+      // Open the final about:blank app window
+      const appWin = window.open('about:blank#bmatteros', '_blank', FEATS);
+      if (!appWin) { loadWin.location.href = BASE_URL + 'app.html'; return; }
+
+      appWin.document.open();
+      if (appHTML) {
+        appWin.document.write('<base href="' + BASE_URL + '">' + appHTML);
+      } else {
+        appWin.document.write(
+          '<!doctype html><html><head><meta charset="utf-8"><title>&#8203;</title>' +
+          '<style>html,body{margin:0;width:100%;height:100%;background:#0a0a0a;overflow:hidden;}</style></head>' +
+          '<body><script>(async()=>{' +
+          'const r=await fetch("' + BASE_URL + 'app.html?t="+Date.now(),{cache:"no-store"});' +
+          'const h=await r.text();' +
+          'document.open();document.write(\'<base href="' + BASE_URL + '">\'+h);document.close();' +
+          '})();<\/script></body></html>'
+        );
+      }
+      appWin.document.close();
+
+      // Close the loading window
+      loadWin.close();
+    });
   }
 
   async function tryInstallPrompt() {
