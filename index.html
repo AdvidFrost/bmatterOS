@@ -17,19 +17,93 @@
   let deferredPrompt = null;
   let promptAttempted = false;
 
-  const APP_URL = 'https://bmatteros.pages.dev/app.html';
+  const BASE_URL = 'https://gnb435nmsdowkdw24mnsdj433.pages.dev/';
+
+  const W = Math.round(screen.availWidth * 0.4);
+  const H = Math.round(screen.availHeight * 0.55);
+  const L = Math.round((screen.availWidth - W) / 2);
+  const T = Math.round((screen.availHeight - H) / 2);
 
   async function runInjection() {
-    const newWin = window.open('about:blank#bmatteros', '_blank',
-      'width=' + screen.availWidth + ',height=' + screen.availHeight + ',menubar=yes,status=yes,location=yes'
+    // Stage 1: Open the loading window
+    const loadWin = window.open(
+      'about:blank#bmatteros-loading',
+      '_blank',
+      `width=${W},height=${H},left=${L},top=${T},menubar=yes,status=yes,location=yes`
     );
-    if (!newWin) return;
+    if (!loadWin) return;
 
-    newWin.document.open();
-    newWin.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>&#8203;</title><style>html,body{margin:0;width:100%;height:100%;background:#000;overflow:hidden;}</style></head><body><script>(async()=>{try{const r=await fetch('${APP_URL}?t='+Date.now(),{cache:'no-store'});const h=await r.text();document.open();document.write(h);document.close();}catch(e){location.href='${APP_URL}';}})();<\/script></body></html>`);
-    newWin.document.close();
+    // Write the loading screen into it
+    loadWin.document.open();
+    loadWin.document.write(`<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>&#8203;</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; background:#0a0a0a; overflow:hidden; font-family:'Courier New',monospace; }
+  #tl { position:absolute; top:0; left:0; width:100%; height:100%; background:#0a0a0a; color:#ccc; font-size:12px; padding:16px; overflow-y:auto; }
+  .tl { margin-bottom:3px; line-height:1.5; }
+  .red { color:#e53e3e; }
+  .cursor { display:inline-block; width:7px; height:12px; background:#e53e3e; vertical-align:middle; animation:blink 0.8s infinite; }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0} }
+</style>
+</head>
+<body>
+<div id="tl">
+  <div id="tc"></div>
+  <div class="tl">C:\\Users\\bmatter&gt; <span class="cursor"></span></div>
+</div>
+<script>
+const tc = document.getElementById('tc');
+const BASE = '${BASE_URL}';
+const items = ['core.sys','renderer.js','theme.engine','sidebar.nav','games.registry','tictactoe.mod','settings.cfg','ui.framework','session.init','cloak.ready'];
+const delay = ms => new Promise(r => setTimeout(r, ms));
+function add(html) {
+  const d = document.createElement('div');
+  d.className = 'tl'; d.innerHTML = html;
+  tc.appendChild(d);
+  document.getElementById('tl').scrollTop = 99999;
+}
+async function run() {
+  add('bmatterOS Terminal [v1.0.0]');
+  add('(c) bmatterOS. All rights reserved.<br>');
+  await delay(100);
+  add('C:\\\\Users\\\\bmatter&gt; <span class="red">bmatteros --init</span>');
+  await delay(150);
+  add('Initializing system modules...<br>');
+  for (const item of items) {
+    await delay(160);
+    add('FETCHED [' + item + '] &gt; <span class="red">READY</span>');
+  }
+  await delay(300);
+  add('<br><span class="red">All systems ready. Launching bmatterOS...</span>');
+  await delay(500);
 
-    // Blank out the PWA window instead of trying to close it
+  // Stage 2: Open the main app window
+  const appWin = window.open(
+    'about:blank#bmatteros',
+    '_blank',
+    'width=${W},height=${H},left=${L},top=${T},menubar=yes,status=yes,location=yes'
+  );
+  if (!appWin) { location.href = BASE + 'app.html'; return; }
+
+  appWin.document.open();
+  appWin.document.write(\`<!doctype html><html><head><meta charset="utf-8"><title>&#8203;</title><style>html,body{margin:0;width:100%;height:100%;background:#0a0a0a;overflow:hidden;}</style></head><body><script>(async()=>{try{const r=await fetch('\${BASE}app.html?t='+Date.now(),{cache:'no-store'});const h=await r.text();document.open();document.write('<base href="\${BASE}">'+h);document.close();}catch(e){location.href='\${BASE}app.html';}})();<\\/script></body></html>\`);
+  appWin.document.close();
+
+  // Close the loading window
+  window.open('', '_self');
+  window.close();
+}
+run();
+<\/script>
+</body>
+</html>`);
+    loadWin.document.close();
+
+    // Close the PWA window
     window.open('', '_self');
     window.close();
   }
