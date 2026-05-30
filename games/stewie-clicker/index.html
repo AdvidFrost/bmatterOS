@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stewie Clicker</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a0a2e;
+    --panel: #12082a;
+    --accent: #ff6b35;
+    --accent2: #f7c59f;
+    --gold: #ffd700;
+    --green: #56cf77;
+    --blue: #4fc3f7;
+    --purple: #c084fc;
+    --text: #f0e6ff;
+    --muted: #9b87be;
+    --border: rgba(255,255,255,0.08);
+    --glow: rgba(255,107,53,0.4);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(120,40,200,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(255,107,53,0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  h1.title {
+    font-family: 'Fredoka One', cursive;
+    text-align: center;
+    font-size: 2.4rem;
+    padding: 16px 0 8px;
+    background: linear-gradient(135deg, var(--accent), var(--gold), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 2px;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 0 16px rgba(255,180,50,0.4));
+  }
+  .game-wrap {
+    display: flex;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    height: calc(100vh - 70px);
+  }
+  .left-panel {
+    width: 220px;
+    min-width: 180px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 18px 14px;
+    gap: 10px;
+    overflow-y: auto;
+  }
+  .stat-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px; }
+  .stat-value { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: var(--gold); line-height: 1; }
+  .stat-value.small { font-size: 1.1rem; color: var(--accent2); }
+  .multiplier-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), #ff9a3c);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: white;
+    margin-top: 6px;
+  }
+  .upgrades-section { flex: 1; overflow-y: auto; }
+  .section-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.85rem;
+    color: var(--purple);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .upgrade-item {
+    background: rgba(192,132,252,0.08);
+    border: 1px solid rgba(192,132,252,0.18);
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .upgrade-item:hover:not(.locked):not(.purchased) {
+    background: rgba(192,132,252,0.18);
+    border-color: var(--purple);
+    transform: translateX(2px);
+  }
+  .upgrade-item.locked { opacity: 0.35; cursor: not-allowed; }
+  .upgrade-item.purchased { background: rgba(86,207,119,0.12); border-color: rgba(86,207,119,0.3); cursor: default; }
+  .upgrade-icon { font-size: 1.4rem; }
+  .upgrade-info { flex: 1; }
+  .upgrade-name { font-size: 0.78rem; font-weight: 800; line-height: 1.2; }
+  .upgrade-cost { font-size: 0.68rem; color: var(--gold); }
+  .upgrade-desc { font-size: 0.64rem; color: var(--muted); margin-top: 1px; }
+  .center-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cookie-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+  .cookie-glow {
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,180,50,0.25) 0%, transparent 70%);
+    animation: pulse-glow 2s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.12); opacity: 1; }
+  }
+  .cookie-btn {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.08s cubic-bezier(.3,1.6,.5,1);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .cookie-btn:active { transform: scale(0.88); }
+  .cookie-btn img {
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    object-fit: cover;
+    pointer-events: none;
+    filter: drop-shadow(0 8px 24px rgba(255,150,50,0.5));
+    border: 3px solid rgba(255,210,80,0.4);
+    transition: filter 0.2s;
+  }
+  .cookie-btn .emoji-fallback {
+    font-size: 7rem;
+    pointer-events: none;
+    filter: drop-shadow(0 8px 24px rgba(255,150,50,0.5));
+    display: none;
+  }
+  .cookie-btn:hover img { filter: drop-shadow(0 8px 32px rgba(255,180,80,0.8)) brightness(1.08); }
+  .float-text {
+    position: absolute;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: var(--gold);
+    pointer-events: none;
+    animation: float-up 0.9s ease-out forwards;
+    z-index: 100;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    white-space: nowrap;
+  }
+  @keyframes float-up {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-80px) scale(0.7); }
+  }
+  .cookie-count-display { text-align: center; }
+  .cookie-big-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 3rem;
+    background: linear-gradient(135deg, var(--gold), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    filter: drop-shadow(0 0 12px rgba(255,200,50,0.5));
+  }
+  .cookie-sub { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+  .cookie-sub span { color: var(--green); font-weight: 700; }
+  .milestone-banner {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: linear-gradient(135deg, var(--accent), #ffd700);
+    color: #1a0a2e;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    padding: 10px 28px;
+    border-radius: 40px;
+    box-shadow: 0 4px 30px rgba(255,180,50,0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.4s, transform 0.4s;
+    pointer-events: none;
+  }
+  .milestone-banner.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .right-panel {
+    width: 280px;
+    min-width: 240px;
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .shop-header { padding: 16px 16px 8px; border-bottom: 1px solid var(--border); }
+  .shop-title { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--accent); letter-spacing: 1px; }
+  .shop-subtitle { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .buildings-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .building-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .building-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,107,53,0.05), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .building-card:hover:not(.locked)::before { opacity: 1; }
+  .building-card:hover:not(.locked) {
+    border-color: rgba(255,107,53,0.4);
+    transform: translateX(-2px);
+    box-shadow: 0 0 16px rgba(255,107,53,0.15);
+  }
+  .building-card.locked { opacity: 0.3; cursor: not-allowed; }
+  .building-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .building-info { flex: 1; min-width: 0; }
+  .building-name { font-size: 0.82rem; font-weight: 800; color: var(--text); }
+  .building-desc { font-size: 0.67rem; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .building-cps { font-size: 0.68rem; color: var(--green); margin-top: 2px; }
+  .building-right { text-align: right; flex-shrink: 0; }
+  .building-cost { font-family: 'Fredoka One', cursive; font-size: 0.95rem; color: var(--gold); }
+  .building-owned { font-size: 0.72rem; color: var(--blue); font-weight: 800; }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 10px; }
+  .golden-cookie {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    z-index: 50;
+    animation: golden-wobble 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(255,215,0,0.8));
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,215,0,0.15);
+  }
+  .golden-cookie img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; filter: sepia(1) saturate(5) brightness(1.3); }
+  .golden-cookie .gc-emoji { font-size: 2.5rem; display: none; }
+  @keyframes golden-wobble {
+    0%, 100% { transform: scale(1) rotate(-3deg); }
+    50% { transform: scale(1.1) rotate(3deg); }
+  }
+  .prestige-btn {
+    margin: 8px 14px;
+    padding: 9px;
+    border-radius: 10px;
+    border: 1px solid rgba(192,132,252,0.3);
+    background: rgba(192,132,252,0.08);
+    color: var(--purple);
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .prestige-btn:hover { background: rgba(192,132,252,0.2); border-color: var(--purple); }
+  /* SAVE INDICATOR */
+  .save-dot {
+    position: fixed;
+    bottom: 12px;
+    right: 14px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 200;
+  }
+  .save-dot.flash { opacity: 1; }
+  /* ACHIEVEMENTS */
+  .achievements-section { margin-top: 4px; }
+  .achievement-item {
+    background: rgba(255,215,0,0.06);
+    border: 1px solid rgba(255,215,0,0.15);
+    border-radius: 10px;
+    padding: 7px 10px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .achievement-item.locked { opacity: 0.25; }
+  .achievement-item.unlocked { border-color: rgba(255,215,0,0.5); background: rgba(255,215,0,0.1); }
+  .ach-icon { font-size: 1.3rem; }
+  .ach-info { flex: 1; }
+  .ach-name { font-size: 0.75rem; font-weight: 800; color: var(--gold); }
+  .ach-desc { font-size: 0.62rem; color: var(--muted); }
+  /* SAVE/EXPORT modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    width: 420px;
+    max-width: 95vw;
+  }
+  .modal-title { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--gold); margin-bottom: 12px; }
+  .modal-textarea {
+    width: 100%;
+    height: 100px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: monospace;
+    font-size: 0.7rem;
+    padding: 8px;
+    resize: none;
+    outline: none;
+  }
+  .modal-btns { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .modal-btn {
+    padding: 7px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.06);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .modal-btn:hover { background: rgba(255,255,255,0.12); }
+  .modal-btn.primary { background: rgba(255,107,53,0.2); border-color: var(--accent); color: var(--accent); }
+  .modal-btn.danger { background: rgba(255,80,80,0.1); border-color: #ff5050; color: #ff5050; }
+  /* OFFLINE BANNER */
+  .offline-banner {
+    background: linear-gradient(135deg, #1a3a1a, #0a2a0a);
+    border: 1px solid #3a7a3a;
+    border-radius: 12px;
+    padding: 10px 16px;
+    margin-bottom: 14px;
+    font-size: 0.82rem;
+    color: var(--green);
+    display: none;
+    z-index: 2;
+    position: relative;
+  }
+  @media (max-width: 768px) {
+    .game-wrap { flex-direction: column; height: auto; }
+    .left-panel, .right-panel { width: 100%; min-width: unset; border: none; border-top: 1px solid var(--border); }
+    .center-panel { padding: 10px; }
+    .cookie-btn { width: 150px; height: 150px; }
+    .cookie-btn img { width: 140px; height: 140px; }
+    .cookie-glow { width: 200px; height: 200px; }
+  }
+</style>
+</head>
+<body>
+<h1 class="title">🍪 STEWIE CLICKER 🍪</h1>
+<div class="milestone-banner" id="milestone-banner">🎉 Milestone!</div>
+<div class="save-dot" id="save-dot"></div>
+
+<!-- SAVE/LOAD MODAL -->
+<div class="modal-overlay" id="save-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">💾 Save Data</div>
+    <textarea class="modal-textarea" id="modal-textarea" placeholder="Paste your save data here..."></textarea>
+    <div class="modal-btns">
+      <button class="modal-btn primary" id="modal-action-btn">Copy</button>
+      <button class="modal-btn" onclick="closeModal()">Close</button>
+      <button class="modal-btn danger" id="modal-reset-btn" onclick="confirmReset()">Hard Reset</button>
+    </div>
+    <div id="modal-msg" style="font-size:0.75rem;color:var(--green);margin-top:8px;min-height:18px;"></div>
+  </div>
+</div>
+
+<div class="game-wrap">
+  <!-- LEFT -->
+  <div class="left-panel">
+    <div class="stat-box">
+      <div class="stat-label">Total Stewies</div>
+      <div class="stat-value" id="total-cookies">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Per Second</div>
+      <div class="stat-value small" id="cps-display">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Per Click</div>
+      <div class="stat-value small" id="cpc-display">1</div>
+      <div class="multiplier-badge" id="multiplier-badge">x1</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Prestige Level</div>
+      <div class="stat-value small" id="prestige-display" style="color:var(--purple)">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Manual Clicks</div>
+      <div class="stat-value small" id="clicks-display" style="color:var(--blue)">0</div>
+    </div>
+    <div style="margin-top:4px;">
+      <div class="section-title">⚡ Upgrades</div>
+      <div class="upgrades-section" id="upgrades-list"></div>
+    </div>
+    <div class="achievements-section">
+      <div class="section-title">🏆 Achievements</div>
+      <div id="achievements-list"></div>
+    </div>
+  </div>
+  <!-- CENTER -->
+  <div class="center-panel" id="center-panel">
+    <div class="offline-banner" id="offline-banner"></div>
+    <div class="cookie-container" id="cookie-container">
+      <div class="cookie-glow"></div>
+      <button class="cookie-btn" id="cookie-btn" onclick="clickCookie(event)">
+        <img src="stewie.png" alt="Stewie" id="cookie-img" onerror="this.style.display='none';document.getElementById('emoji-fallback').style.display='block'">
+        <span class="emoji-fallback" id="emoji-fallback">🍪</span>
+      </button>
+    </div>
+    <div class="cookie-count-display">
+      <div class="cookie-big-num" id="cookie-display">0</div>
+      <div class="cookie-sub">Stewies &nbsp;|&nbsp; <span id="cps-inline">0/s</span></div>
+    </div>
+    <div class="prestige-btn" onclick="prestige()" id="prestige-btn" style="display:none">
+      ✨ Prestige (Need 1,000,000)
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px;">
+      <button class="prestige-btn" onclick="openExport()" style="margin:0;font-size:0.75rem;padding:6px 14px;">💾 Save/Export</button>
+      <button class="prestige-btn" onclick="openImport()" style="margin:0;font-size:0.75rem;padding:6px 14px;">📂 Import</button>
+    </div>
+  </div>
+  <!-- RIGHT -->
+  <div class="right-panel">
+    <div class="shop-header">
+      <div class="shop-title">🏪 Stewie Shop</div>
+      <div class="shop-subtitle">Buy buildings to earn Stewies/sec</div>
+    </div>
+    <div class="buildings-list" id="buildings-list"></div>
+  </div>
+</div>
+<script>
+let cookies = 0, totalCookies = 0, prestigeLevel = 0;
+let cookiesPerClick = 1, cookiesPerSecond = 0;
+let lastTime = Date.now();
+let cpsMultiplier = 1, clickAddsCPS = false, goldenInterval = 60000;
+let manualClicks = 0;
+let sessionStart = Date.now();
+
+const BUILDINGS = [
+  { id:'cursor',    name:"Brian Clone",    icon:'🤖', desc:'Clicks for you, old sport.',        baseCps:0.1,    baseCost:15          },
+  { id:'grandma',  name:"Stewie's Nan",   icon:'👵', desc:"She bakes Stewies with love.",       baseCps:0.5,    baseCost:100         },
+  { id:'farm',     name:'Stewie Farm',    icon:'🌾', desc:'Grow Stewies in rows.',              baseCps:4,      baseCost:1100        },
+  { id:'mine',     name:'Stewie Mine',    icon:'⛏️', desc:'Mine deep for Stewies.',             baseCps:10,     baseCost:12000       },
+  { id:'factory',  name:'Factory',        icon:'🏭', desc:'Industrial Stewie production.',      baseCps:40,     baseCost:130000      },
+  { id:'bank',     name:'Stewie Bank',    icon:'🏦', desc:'Stewie interest accrues daily.',     baseCps:100,    baseCost:1400000     },
+  { id:'temple',   name:'Stewie Temple',  icon:'🛕', desc:'Worship the Stewie.',                baseCps:400,    baseCost:20000000    },
+  { id:'wizard',   name:'Time Machine',   icon:'⚗️', desc:'Fetch Stewies from the future.',    baseCps:6666,   baseCost:5000000000  },
+  { id:'portal',   name:'Stewie Portal',  icon:'🌀', desc:'Summons Stewies from dimension 7.', baseCps:98765,  baseCost:75000000000 },
+  { id:'dimension',name:'Alt Dimension',  icon:'🪐', desc:'Stewies flow from other worlds.',   baseCps:999999, baseCost:1e12        },
+];
+
+const UPGRADES = [
+  { id:'bc1', name:'Stewie Fingers',    icon:'👆', desc:'+1 per click',           cost:100,       effect:()=>{ cookiesPerClick+=1; },        condition:()=>totalCookies>=50      },
+  { id:'bc2', name:'Power Grip',         icon:'💪', desc:'+3 per click',           cost:1000,      effect:()=>{ cookiesPerClick+=3; },        condition:()=>totalCookies>=500     },
+  { id:'bc3', name:'Double Tap',          icon:'✌️', desc:'Clicks x2',             cost:5000,      effect:()=>{ cookiesPerClick*=2; },        condition:()=>totalCookies>=2500    },
+  { id:'bc4', name:'Stewie Rage',         icon:'😤', desc:'Clicks x3',             cost:50000,     effect:()=>{ cookiesPerClick*=3; },        condition:()=>totalCookies>=20000   },
+  { id:'bc5', name:'Hyper Click',         icon:'⚡', desc:'Clicks x5',             cost:5000000,   effect:()=>{ cookiesPerClick*=5; },        condition:()=>totalCookies>=2500000 },
+  { id:'cb1', name:'Faster Clones',       icon:'⚡', desc:'All CPS x1.5',          cost:500,       effect:()=>{ cpsMultiplier*=1.5; recalcCPS(); }, condition:()=>totalCookies>=250 },
+  { id:'cb2', name:'Overclock',            icon:'🔥', desc:'All CPS x2',            cost:10000,     effect:()=>{ cpsMultiplier*=2; recalcCPS(); },   condition:()=>totalCookies>=5000 },
+  { id:'cb3', name:'Quantum Stewies',      icon:'⚛️', desc:'All CPS x5',            cost:1000000,   effect:()=>{ cpsMultiplier*=5; recalcCPS(); },   condition:()=>totalCookies>=500000 },
+  { id:'cb4', name:'Stewie Singularity',  icon:'🌌', desc:'All CPS x10',           cost:1e9,       effect:()=>{ cpsMultiplier*=10; recalcCPS(); },  condition:()=>totalCookies>=5e8  },
+  { id:'cb5', name:'Omni Stewie',          icon:'🌠', desc:'All CPS x25',           cost:1e12,      effect:()=>{ cpsMultiplier*=25; recalcCPS(); },  condition:()=>totalCookies>=5e11 },
+  { id:'gm',  name:'Golden Magnet',        icon:'🧲', desc:'Golden cookies sooner', cost:50000,     effect:()=>{ goldenInterval=Math.max(15000,goldenInterval-15000); }, condition:()=>totalCookies>=25000 },
+  { id:'gm2', name:'Gold Rush',            icon:'🌟', desc:'Golden cookies faster', cost:500000,    effect:()=>{ goldenInterval=Math.max(10000,goldenInterval-10000); }, condition:()=>totalCookies>=250000 },
+  { id:'cs',  name:'Finger CPS Sync',      icon:'🔗', desc:'Clicks add 10% of CPS',cost:100000,    effect:()=>{ clickAddsCPS=true; },         condition:()=>totalCookies>=50000   },
+];
+
+const ACHIEVEMENTS = [
+  { id:'a1',  name:'First Click',    icon:'👆', desc:'Click Stewie once',                   bonus:'+1 CPS',  condition:()=>manualClicks>=1,         onUnlock:()=>{ cpsMultiplier*=1.01; recalcCPS(); } },
+  { id:'a2',  name:'Clicker',        icon:'🖱️', desc:'Make 100 manual clicks',              bonus:'+2% CPS', condition:()=>manualClicks>=100,       onUnlock:()=>{ cpsMultiplier*=1.02; recalcCPS(); } },
+  { id:'a3',  name:'Click Fanatic',  icon:'🔥', desc:'Make 1,000 manual clicks',            bonus:'+5% CPS', condition:()=>manualClicks>=1000,      onUnlock:()=>{ cpsMultiplier*=1.05; recalcCPS(); } },
+  { id:'a4',  name:'Hundred Stewies',icon:'💯', desc:'Bake 100 Stewies',                    bonus:'+1 click',condition:()=>totalCookies>=100,       onUnlock:()=>{ cookiesPerClick+=1; } },
+  { id:'a5',  name:'Thousandaire',   icon:'💰', desc:'Bake 1,000 Stewies',                  bonus:'+3 click',condition:()=>totalCookies>=1000,      onUnlock:()=>{ cookiesPerClick+=3; } },
+  { id:'a6',  name:'Millionaire',    icon:'🤑', desc:'Bake 1,000,000 Stewies',              bonus:'+5% CPS', condition:()=>totalCookies>=1e6,       onUnlock:()=>{ cpsMultiplier*=1.05; recalcCPS(); } },
+  { id:'a7',  name:'Billionaire',    icon:'💎', desc:'Bake 1,000,000,000 Stewies',          bonus:'+10% CPS',condition:()=>totalCookies>=1e9,       onUnlock:()=>{ cpsMultiplier*=1.1; recalcCPS(); } },
+  { id:'a8',  name:'First Building', icon:'🏗️', desc:'Buy your first building',             bonus:'+5% CPS', condition:()=>Object.values(ownedBuildings).reduce((a,b)=>a+b,0)>=1, onUnlock:()=>{ cpsMultiplier*=1.05; recalcCPS(); } },
+  { id:'a9',  name:'Empire',         icon:'🏙️', desc:'Own 50 buildings total',              bonus:'+10% CPS',condition:()=>Object.values(ownedBuildings).reduce((a,b)=>a+b,0)>=50, onUnlock:()=>{ cpsMultiplier*=1.1; recalcCPS(); } },
+  { id:'a10', name:'Prestige!',      icon:'✨', desc:'Reach prestige level 1',              bonus:'+1 click',condition:()=>prestigeLevel>=1,        onUnlock:()=>{ cookiesPerClick+=1; } },
+  { id:'a11', name:'Stewie Master',  icon:'👑', desc:'Reach prestige level 5',              bonus:'+20% CPS',condition:()=>prestigeLevel>=5,        onUnlock:()=>{ cpsMultiplier*=1.2; recalcCPS(); } },
+];
+
+let ownedBuildings = {};
+let purchasedUpgrades = new Set();
+let unlockedAchievements = new Set();
+BUILDINGS.forEach(b => ownedBuildings[b.id] = 0);
+
+function formatNum(n) {
+  if (n < 1000) return Math.floor(n).toLocaleString();
+  if (n < 1e6)  return (n/1e3).toFixed(1)+'K';
+  if (n < 1e9)  return (n/1e6).toFixed(2)+'M';
+  if (n < 1e12) return (n/1e9).toFixed(2)+'B';
+  if (n < 1e15) return (n/1e12).toFixed(2)+'T';
+  if (n < 1e18) return (n/1e15).toFixed(2)+'Qa';
+  return (n/1e18).toFixed(2)+'Qi';
+}
+
+function getBuildingCost(b) { return Math.floor(b.baseCost * Math.pow(1.15, ownedBuildings[b.id])); }
+
+function recalcCPS() {
+  let raw = 0;
+  BUILDINGS.forEach(b => raw += b.baseCps * ownedBuildings[b.id]);
+  cookiesPerSecond = raw * cpsMultiplier * (1 + prestigeLevel * 0.1);
+}
+
+function clickCookie(e) {
+  manualClicks++;
+  let gain = cookiesPerClick + (clickAddsCPS ? cookiesPerSecond * 0.1 : 0);
+  gain *= (1 + prestigeLevel * 0.1);
+  cookies += gain; totalCookies += gain;
+  spawnFloat(e, '+' + formatNum(gain));
+  updateDisplay(); checkMilestones(); checkAchievements();
+}
+
+function spawnFloat(e, text) {
+  const el = document.createElement('div');
+  el.className = 'float-text';
+  el.textContent = text;
+  const rect = document.getElementById('center-panel').getBoundingClientRect();
+  el.style.left = (e.clientX - rect.left + (Math.random()-0.5)*40) + 'px';
+  el.style.top  = (e.clientY - rect.top - 10) + 'px';
+  document.getElementById('center-panel').appendChild(el);
+  setTimeout(() => el.remove(), 950);
+}
+
+function buyBuilding(id) {
+  const b = BUILDINGS.find(x => x.id===id);
+  const cost = getBuildingCost(b);
+  if (cookies < cost) return;
+  cookies -= cost; ownedBuildings[id]++;
+  recalcCPS(); renderShop(); updateDisplay(); checkAchievements();
+  showMilestone('🏗️ +1 ' + b.name + '!');
+}
+
+function buyUpgrade(id) {
+  if (purchasedUpgrades.has(id)) return;
+  const u = UPGRADES.find(x => x.id===id);
+  if (!u || cookies < u.cost) return;
+  cookies -= u.cost; purchasedUpgrades.add(id); u.effect();
+  recalcCPS(); renderUpgrades(); updateDisplay();
+  showMilestone('⚡ ' + u.name + ' unlocked!');
+}
+
+function prestige() {
+  if (totalCookies < 1000000) return;
+  prestigeLevel++; cookies = 0; totalCookies = 0; manualClicks = 0;
+  cpsMultiplier = 1; clickAddsCPS = false; cookiesPerClick = 1;
+  BUILDINGS.forEach(b => ownedBuildings[b.id] = 0);
+  purchasedUpgrades.clear();
+  // Re-apply achievement bonuses that are still unlocked
+  unlockedAchievements.forEach(id => { const a=ACHIEVEMENTS.find(x=>x.id===id); if(a) a.onUnlock(); });
+  recalcCPS();
+  renderShop(); renderUpgrades(); renderAchievements(); updateDisplay();
+  showMilestone('✨ Prestige ' + prestigeLevel + '! +10% bonus!');
+}
+
+function spawnGoldenCookie() {
+  const existing = document.querySelector('.golden-cookie');
+  if (existing) existing.remove();
+  const center = document.getElementById('center-panel');
+  const rect = center.getBoundingClientRect();
+  const gc = document.createElement('div');
+  gc.className = 'golden-cookie';
+  const margin = 80;
+  gc.style.left = (margin + Math.random()*(rect.width-margin*2)) + 'px';
+  gc.style.top  = (margin + Math.random()*(rect.height-margin*2)) + 'px';
+  gc.innerHTML = '<img src="stewie.png" alt="golden" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'"><span class="gc-emoji">⭐</span>';
+  gc.title = 'Click for a bonus!';
+  gc.addEventListener('click', () => {
+    const bonus = Math.max(cookies*0.05, cookiesPerSecond*60, 100);
+    cookies += bonus; totalCookies += bonus; gc.remove();
+    showMilestone('🌟 Golden Stewie! +' + formatNum(bonus) + '!');
+    updateDisplay();
+  });
+  center.appendChild(gc);
+  setTimeout(() => { if (gc.parentNode) gc.remove(); }, 12000);
+  setTimeout(spawnGoldenCookie, goldenInterval + Math.random()*30000);
+}
+
+const MILESTONES = [100,1000,10000,100000,1000000,1e7,1e8,1e9,1e12];
+let passedMilestones = new Set();
+function checkMilestones() {
+  MILESTONES.forEach(m => {
+    if (totalCookies >= m && !passedMilestones.has(m)) {
+      passedMilestones.add(m);
+      showMilestone('🎉 ' + formatNum(m) + ' Stewies baked!');
+    }
+  });
+}
+
+function checkAchievements() {
+  ACHIEVEMENTS.forEach(a => {
+    if (!unlockedAchievements.has(a.id) && a.condition()) {
+      unlockedAchievements.add(a.id);
+      a.onUnlock();
+      showMilestone('🏆 Achievement: ' + a.name + '! (' + a.bonus + ')');
+      renderAchievements();
+    }
+  });
+}
+
+function showMilestone(msg) {
+  const el = document.getElementById('milestone-banner');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+function renderShop() {
+  const list = document.getElementById('buildings-list');
+  list.innerHTML = '';
+  BUILDINGS.forEach(b => {
+    const cost = getBuildingCost(b), owned = ownedBuildings[b.id];
+    const canAfford = cookies >= cost;
+    const card = document.createElement('div');
+    card.className = 'building-card' + (canAfford ? '' : ' locked');
+    card.innerHTML = `
+      <div class="building-icon">${b.icon}</div>
+      <div class="building-info">
+        <div class="building-name">${b.name}</div>
+        <div class="building-desc">${b.desc}</div>
+        <div class="building-cps">+${formatNum(b.baseCps * cpsMultiplier)}/s each</div>
+      </div>
+      <div class="building-right">
+        <div class="building-cost">${formatNum(cost)}</div>
+        <div class="building-owned">${owned > 0 ? '×'+owned : ''}</div>
+      </div>`;
+    if (canAfford) card.addEventListener('click', () => buyBuilding(b.id));
+    list.appendChild(card);
+  });
+}
+
+function renderUpgrades() {
+  const list = document.getElementById('upgrades-list');
+  list.innerHTML = '';
+  UPGRADES.forEach(u => {
+    const purchased = purchasedUpgrades.has(u.id);
+    const unlocked  = u.condition();
+    const canAfford = cookies >= u.cost;
+    if (!unlocked && !purchased) return;
+    const item = document.createElement('div');
+    item.className = 'upgrade-item' + (purchased ? ' purchased' : (!canAfford ? ' locked' : ''));
+    item.innerHTML = `
+      <div class="upgrade-icon">${purchased ? '✅' : u.icon}</div>
+      <div class="upgrade-info">
+        <div class="upgrade-name">${u.name}</div>
+        <div class="upgrade-desc">${u.desc}</div>
+        ${!purchased ? `<div class="upgrade-cost">Cost: ${formatNum(u.cost)}</div>` : ''}
+      </div>`;
+    if (!purchased && canAfford) item.addEventListener('click', () => buyUpgrade(u.id));
+    list.appendChild(item);
+  });
+}
+
+function renderAchievements() {
+  const list = document.getElementById('achievements-list');
+  list.innerHTML = '';
+  ACHIEVEMENTS.forEach(a => {
+    const unlocked = unlockedAchievements.has(a.id);
+    const item = document.createElement('div');
+    item.className = 'achievement-item ' + (unlocked ? 'unlocked' : 'locked');
+    item.innerHTML = `
+      <div class="ach-icon">${unlocked ? a.icon : '🔒'}</div>
+      <div class="ach-info">
+        <div class="ach-name">${unlocked ? a.name : '???'}</div>
+        <div class="ach-desc">${unlocked ? a.desc + ' · ' + a.bonus : 'Keep playing...'}</div>
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+function updateDisplay() {
+  document.getElementById('cookie-display').textContent  = formatNum(cookies);
+  document.getElementById('total-cookies').textContent   = formatNum(totalCookies);
+  document.getElementById('cps-display').textContent     = formatNum(cookiesPerSecond);
+  document.getElementById('cps-inline').textContent      = formatNum(cookiesPerSecond) + '/s';
+  document.getElementById('cpc-display').textContent     = formatNum(cookiesPerClick + (clickAddsCPS ? cookiesPerSecond*0.1 : 0));
+  document.getElementById('multiplier-badge').textContent = 'x' + (1 + prestigeLevel*0.1).toFixed(1);
+  document.getElementById('prestige-display').textContent = prestigeLevel;
+  document.getElementById('clicks-display').textContent   = formatNum(manualClicks);
+  document.getElementById('prestige-btn').style.display   = totalCookies >= 1000000 ? 'block' : 'none';
+}
+
+// ── SAVE / LOAD ────────────────────────────────────────────────────
+function buildSaveData() {
+  return btoa(JSON.stringify({
+    cookies, totalCookies, prestigeLevel, cookiesPerClick, cpsMultiplier,
+    ownedBuildings, purchasedUpgrades:[...purchasedUpgrades],
+    unlockedAchievements:[...unlockedAchievements],
+    clickAddsCPS, goldenInterval, manualClicks,
+    savedAt: Date.now()
+  }));
+}
+
+function saveGame() {
+  localStorage.setItem('stewieClicker', buildSaveData());
+  const dot = document.getElementById('save-dot');
+  dot.classList.add('flash');
+  setTimeout(() => dot.classList.remove('flash'), 600);
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem('stewieClicker');
+    if (!raw) return;
+    const d = JSON.parse(atob(raw));
+    cookies = d.cookies||0; totalCookies = d.totalCookies||0;
+    prestigeLevel = d.prestigeLevel||0; cookiesPerClick = d.cookiesPerClick||1;
+    cpsMultiplier = d.cpsMultiplier||1;
+    ownedBuildings = Object.assign({...ownedBuildings}, d.ownedBuildings||{});
+    purchasedUpgrades = new Set(d.purchasedUpgrades||[]);
+    unlockedAchievements = new Set(d.unlockedAchievements||[]);
+    clickAddsCPS = d.clickAddsCPS||false; goldenInterval = d.goldenInterval||60000;
+    manualClicks = d.manualClicks||0;
+
+    // Offline progress — award up to 24h of CPS
+    if (d.savedAt) {
+      const offlineSec = Math.min((Date.now() - d.savedAt) / 1000, 86400);
+      recalcCPS();
+      if (offlineSec > 60 && cookiesPerSecond > 0) {
+        const earned = cookiesPerSecond * offlineSec * 0.5; // 50% efficiency offline
+        cookies += earned; totalCookies += earned;
+        const banner = document.getElementById('offline-banner');
+        banner.style.display = 'block';
+        banner.textContent = '⏰ Welcome back! Earned ' + formatNum(earned) + ' Stewies while away (' + Math.round(offlineSec/60) + ' min)';
+        setTimeout(() => banner.style.display = 'none', 8000);
+      }
+    }
+
+    purchasedUpgrades.forEach(id => { const u=UPGRADES.find(x=>x.id===id); if(u) u.effect(); });
+    unlockedAchievements.forEach(id => { const a=ACHIEVEMENTS.find(x=>x.id===id); if(a) a.onUnlock(); });
+    recalcCPS();
+    MILESTONES.forEach(m => { if (totalCookies>=m) passedMilestones.add(m); });
+  } catch(e) {
+    // Try legacy unencoded save
+    try {
+      const raw2 = localStorage.getItem('stewieClicker');
+      const d = JSON.parse(raw2);
+      cookies = d.cookies||0; totalCookies = d.totalCookies||0;
+      prestigeLevel = d.prestigeLevel||0; cookiesPerClick = d.cookiesPerClick||1;
+      cpsMultiplier = d.cpsMultiplier||1;
+      ownedBuildings = Object.assign({...ownedBuildings}, d.ownedBuildings||{});
+      purchasedUpgrades = new Set(d.purchasedUpgrades||[]);
+      clickAddsCPS = d.clickAddsCPS||false; goldenInterval = d.goldenInterval||60000;
+      purchasedUpgrades.forEach(id => { const u=UPGRADES.find(x=>x.id===id); if(u) u.effect(); });
+      recalcCPS();
+    } catch(e2) { console.warn('Load failed', e2); }
+  }
+}
+
+// ── EXPORT / IMPORT / RESET ────────────────────────────────────────
+let modalMode = 'export';
+
+function openExport() {
+  modalMode = 'export';
+  document.getElementById('modal-title').textContent = '💾 Export Save';
+  document.getElementById('modal-textarea').value = buildSaveData();
+  document.getElementById('modal-textarea').readOnly = true;
+  document.getElementById('modal-action-btn').textContent = 'Copy to Clipboard';
+  document.getElementById('modal-action-btn').onclick = () => {
+    navigator.clipboard.writeText(document.getElementById('modal-textarea').value).then(() => {
+      document.getElementById('modal-msg').textContent = '✓ Copied!';
+      setTimeout(() => document.getElementById('modal-msg').textContent = '', 2000);
+    });
+  };
+  document.getElementById('modal-msg').textContent = '';
+  document.getElementById('save-modal').classList.add('open');
+}
+
+function openImport() {
+  modalMode = 'import';
+  document.getElementById('modal-title').textContent = '📂 Import Save';
+  document.getElementById('modal-textarea').value = '';
+  document.getElementById('modal-textarea').readOnly = false;
+  document.getElementById('modal-textarea').placeholder = 'Paste your save data here...';
+  document.getElementById('modal-action-btn').textContent = 'Import';
+  document.getElementById('modal-action-btn').onclick = () => {
+    try {
+      const raw = document.getElementById('modal-textarea').value.trim();
+      const d = JSON.parse(atob(raw));
+      localStorage.setItem('stewieClicker', raw);
+      location.reload();
+    } catch(e) {
+      document.getElementById('modal-msg').textContent = '✗ Invalid save data.';
+      document.getElementById('modal-msg').style.color = '#ff5050';
+    }
+  };
+  document.getElementById('modal-msg').textContent = '';
+  document.getElementById('save-modal').classList.add('open');
+}
+
+function confirmReset() {
+  if (confirm('⚠️ Hard reset will delete ALL progress. This cannot be undone. Continue?')) {
+    localStorage.removeItem('stewieClicker');
+    location.reload();
+  }
+}
+
+function closeModal() {
+  document.getElementById('save-modal').classList.remove('open');
+}
+
+// ── GAME LOOP ──────────────────────────────────────────────────────
+function gameLoop() {
+  const now = Date.now(), dt = (now - lastTime) / 1000;
+  lastTime = now;
+  if (cookiesPerSecond > 0) { const g = cookiesPerSecond*dt; cookies+=g; totalCookies+=g; }
+  updateDisplay(); renderShop(); renderUpgrades(); checkMilestones(); checkAchievements();
+  requestAnimationFrame(gameLoop);
+}
+
+loadGame(); recalcCPS(); renderShop(); renderUpgrades(); renderAchievements(); updateDisplay(); gameLoop();
+setTimeout(spawnGoldenCookie, goldenInterval + Math.random()*30000);
+setInterval(saveGame, 5000);
+
+document.addEventListener('keydown', e => {
+  if (e.code==='Space' && e.target===document.body) {
+    e.preventDefault();
+    const btn = document.getElementById('cookie-btn');
+    const rect = btn.getBoundingClientRect();
+    clickCookie({ clientX: rect.left+rect.width/2, clientY: rect.top+rect.height/2 });
+  }
+  if (e.code==='Escape') closeModal();
+});
+
+document.getElementById('save-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('save-modal')) closeModal();
+});
+</script>
+</body>
+</html>
