@@ -376,6 +376,17 @@ const GAMES = [
     icon: 'https://cdn.jsdelivr.net/gh/FailedRifle/hamburger@main/games/retro-bowl/icon.png',
     desc: 'Classic pixel-art American football management game.\n\nManage your team, call plays, and lead your squad to the Retro Bowl!\n\n⚠️ Save data is stored in your browser automatically.'
   },
+  {
+    id: 'stewieclicker',
+    name: 'Stewie Clicker',
+    emoji: '🍪',
+    tag: 'idle',
+    type: 'iframe',
+    url: 'games/stewie-clicker/index.html',
+    banner: '',
+    icon: '',
+    desc: 'Click Stewie to earn Stewies! Buy buildings, unlock upgrades, and prestige for permanent bonuses.\n\n✨ Features:\n• 10 buildings with scaling costs\n• 10 upgrades including CPS multipliers\n• Prestige system (+10% bonus per level)\n• Offline progress — earn while away\n• Achievements with real bonuses\n• Golden Stewie bonus cookies\n• Import / Export save data\n\n💡 Tip: Press SPACE to click without moving your mouse!'
+  },
   // ADD MORE GAMES BELOW THIS LINE:
   // {
   //   id: 'mygame',
@@ -500,12 +511,10 @@ function openDetail(id) {
   const game = GAMES.find(g => g.id === id);
   if (!game) return;
 
-  // Show detail, hide list
   document.getElementById('games-list-view').style.display = 'none';
   const detail = document.getElementById('game-detail');
   detail.classList.add('show');
 
-  // Banner
   const banner = document.getElementById('detail-banner');
   if (game.banner) {
     banner.innerHTML = `<img src="${game.banner}" onerror="this.innerHTML='<span class=detail-banner-emoji>${game.emoji}</span>'">`;
@@ -527,7 +536,6 @@ function closeDetail() {
 // ── GAME LAUNCH ────────────────────────────────────────────────────
 function launchGame(game) {
   if (game.type === 'builtin') {
-    // Built-in games always open in-app
     document.getElementById('overlay-title').textContent = game.name;
     const content = document.getElementById('game-content');
     if (game.id === 'tictactoe') { content.innerHTML = buildTTT(); initTTT(); }
@@ -538,29 +546,26 @@ function launchGame(game) {
   const mode = launchMode;
 
   if (mode === 'app') {
-    // Open iframe inside the app overlay
     document.getElementById('overlay-title').textContent = game.name;
     document.getElementById('game-content').innerHTML =
       `<iframe src="${game.url}" style="width:100%;height:100%;border:none;" allowfullscreen></iframe>`;
     document.getElementById('game-overlay').classList.add('open');
 
   } else if (mode === 'blank') {
-    // Inject into a new about:blank browser tab like CheddarOS does
+    // Open in a new about:blank tab with the game in a full-page iframe
     const win = window.open('about:blank#bmos/' + game.id, '_blank');
     if (!win) { alert('Pop-ups are blocked! Please allow pop-ups for this site.'); return; }
     win.document.open();
     win.document.write(
       `<!doctype html><html><head><title>${game.name}</title>` +
-      `<style>*{margin:0;padding:0;}html,body{width:100%;height:100%;overflow:hidden;background:#000;}</style></head>` +
-      `<body><script>` +
-      `fetch('${game.url}').then(r=>r.text()).then(h=>{document.open();document.write(h);document.close();})` +
-      `.catch(()=>{document.body.innerHTML='<div style="color:#fff;padding:20px;font-family:sans-serif;">Failed to load game.</div>';});` +
-      `<\/script></body></html>`
+      `<style>*{margin:0;padding:0;}html,body{width:100%;height:100%;overflow:hidden;background:#000;}` +
+      `iframe{width:100%;height:100%;border:none;display:block;}</style></head>` +
+      `<body><iframe src="${game.url}" allowfullscreen></iframe></body></html>`
     );
     win.document.close();
 
   } else if (mode === 'window') {
-    // Open in a new popup window
+    // Open in a resizable popup window with the game in a full-page iframe
     const w = Math.round(screen.availWidth * 0.7);
     const h = Math.round(screen.availHeight * 0.75);
     const l = Math.round((screen.availWidth - w) / 2);
@@ -573,11 +578,9 @@ function launchGame(game) {
     win.document.open();
     win.document.write(
       `<!doctype html><html><head><title>${game.name}</title>` +
-      `<style>*{margin:0;padding:0;}html,body{width:100%;height:100%;overflow:hidden;background:#000;}</style></head>` +
-      `<body><script>` +
-      `fetch('${game.url}').then(r=>r.text()).then(h=>{document.open();document.write(h);document.close();})` +
-      `.catch(()=>{document.body.innerHTML='<div style="color:#fff;padding:20px;font-family:sans-serif;">Failed to load.</div>';});` +
-      `<\/script></body></html>`
+      `<style>*{margin:0;padding:0;}html,body{width:100%;height:100%;overflow:hidden;background:#000;}` +
+      `iframe{width:100%;height:100%;border:none;display:block;}</style></head>` +
+      `<body><iframe src="${game.url}" allowfullscreen></iframe></body></html>`
     );
     win.document.close();
   }
@@ -688,7 +691,7 @@ async function submitReport() {
 const tlContent = document.getElementById('tl-content');
 const tlDelay = ms => new Promise(r => setTimeout(r, ms));
 function tlAdd(html){const d=document.createElement('div');d.className='tl';d.innerHTML=html;tlContent.appendChild(d);document.getElementById('terminal-loader').scrollTop=99999;}
-const TL_ITEMS=['core.sys','renderer.js','theme.engine','sidebar.nav','games.registry','retrobowl.mod','tictactoe.mod','settings.cfg','ui.framework','cloak.ready'];
+const TL_ITEMS=['core.sys','renderer.js','theme.engine','sidebar.nav','games.registry','retrobowl.mod','tictactoe.mod','stewieclicker.mod','settings.cfg','ui.framework','cloak.ready'];
 async function runLoader(){
   tlAdd('bmatterOS Terminal [v1.0.0]');
   tlAdd('(c) bmatterOS. All rights reserved.<br>');
