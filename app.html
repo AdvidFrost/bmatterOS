@@ -63,7 +63,6 @@
   .tab-panel::-webkit-scrollbar{width:6px;}
   .tab-panel::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px;}
 
-  /* HOME */
   .home-header{margin-bottom:1.5rem;}
   .home-header h1{font-size:1.6rem;font-weight:700;color:var(--text);margin-bottom:0.25rem;}
   .home-header p{color:var(--text2);font-size:0.88rem;}
@@ -81,7 +80,6 @@
   .featured-name{font-size:0.85rem;font-weight:600;color:var(--text);}
   .featured-desc{font-size:0.75rem;color:var(--text2);}
 
-  /* GAMES GRID */
   .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.75rem;margin-bottom:1.5rem;}
   .game-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all 0.15s;}
   .game-card:hover{border-color:var(--accent);transform:translateY(-2px);}
@@ -93,7 +91,6 @@
   .game-name{font-size:0.85rem;font-weight:600;color:var(--text);margin-bottom:0.15rem;}
   .game-tag{font-size:0.7rem;color:var(--accent);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em;}
 
-  /* GAME DETAIL PAGE */
   #game-detail{display:none;height:100%;flex-direction:column;}
   #game-detail.show{display:flex;}
   .detail-banner{width:100%;height:140px;background:var(--bg3);flex-shrink:0;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
@@ -109,7 +106,6 @@
   .detail-body{flex:1;overflow-y:auto;padding:1.25rem;}
   .detail-desc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;font-size:0.85rem;color:var(--text2);line-height:1.7;white-space:pre-wrap;}
 
-  /* GAME OVERLAY (in-app iframe) */
   #game-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:100;flex-direction:column;}
   #game-overlay.open{display:flex;}
   .overlay-bar{height:40px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1rem;gap:0.75rem;flex-shrink:0;}
@@ -117,7 +113,6 @@
   .overlay-close{background:none;border:1px solid var(--border);color:var(--text2);font-size:0.8rem;padding:0.2rem 0.6rem;border-radius:4px;cursor:pointer;font-family:var(--font-ui);transition:all 0.12s;}
   .overlay-close:hover{border-color:var(--accent);color:var(--accent);}
 
-  /* TTT */
   .ttt-wrap{display:flex;flex-direction:column;align-items:center;padding:1.5rem;height:100%;}
   .ttt-status{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:1.25rem;font-family:var(--font-mono);}
   .ttt-status span{color:var(--accent);}
@@ -130,7 +125,6 @@
   .score-row{display:flex;gap:1.5rem;margin-bottom:1rem;font-family:var(--font-mono);font-size:0.85rem;color:var(--text3);}
   .score-row span{color:var(--accent);font-weight:700;}
 
-  /* SETTINGS */
   .settings-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;}
   .settings-section h3{font-size:0.8rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
   .setting-row{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;}
@@ -154,7 +148,6 @@
   .about-box{font-family:var(--font-mono);font-size:0.78rem;color:var(--text3);line-height:1.9;}
   .about-box span{color:var(--accent);}
 
-  /* SUPPORT */
   .support-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
   .support-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;cursor:pointer;transition:all 0.15s;}
   .support-card:hover{border-color:var(--accent);background:var(--bg3);}
@@ -223,7 +216,6 @@
           <div class="section-title">All Games</div>
           <div class="games-grid" id="games-grid"></div>
         </div>
-        <!-- GAME DETAIL -->
         <div id="game-detail">
           <div class="detail-banner" id="detail-banner"></div>
           <div class="detail-meta">
@@ -295,13 +287,12 @@
         </div>
         <div class="settings-section">
           <h3>Game Launch Mode</h3>
-          <div class="setting-desc" style="margin-bottom:0.75rem">Choose how games open when you press Play</div>
+          <div class="setting-desc" style="margin-bottom:0.75rem">Choose how external games open. Built-in games (Tic-Tac-Toe, Stewie Clicker) always open in-app.</div>
           <div class="launch-mode-grid">
-            <button class="launch-mode-btn active" id="lm-app" onclick="setLaunchMode('app')">In-App</button>
-            <button class="launch-mode-btn" id="lm-blank" onclick="setLaunchMode('blank')">about:blank Tab</button>
+            <button class="launch-mode-btn active" id="lm-blank" onclick="setLaunchMode('blank')">Tab (about:blank)</button>
             <button class="launch-mode-btn" id="lm-window" onclick="setLaunchMode('window')">New Window</button>
           </div>
-          <div style="font-size:0.75rem;color:var(--text3);margin-top:0.6rem;" id="lm-desc">Opens inside the bmatterOS window</div>
+          <div style="font-size:0.75rem;color:var(--text3);margin-top:0.6rem;" id="lm-desc">Opens in a new about:blank browser tab</div>
         </div>
         <div class="settings-section">
           <h3>Interface</h3>
@@ -330,7 +321,7 @@
   </div>
 </div>
 
-<!-- IN-APP GAME OVERLAY -->
+<!-- IN-APP GAME OVERLAY (built-in games only) -->
 <div id="game-overlay">
   <div class="overlay-bar">
     <div class="overlay-title" id="overlay-title">Game</div>
@@ -340,20 +331,12 @@
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 // GAMES LIST
-// To add a game, copy one of the entries below and fill in the fields.
-// Fields:
-//   id       — unique key, no spaces
-//   name     — display name
-//   emoji    — shown when no banner/icon image
-//   tag      — category label (sports, arcade, action, etc)
-//   type     — 'iframe' for web games, 'builtin' for built-in games
-//   url      — game URL (for iframe games)
-//   banner   — URL to a banner image (wide, ~4:1) — use '' to skip
-//   icon     — URL to a square icon image — use '' to skip
-//   desc     — description shown on the game detail page
-// ══════════════════════════════════════════════════════════════════
+// type: 'builtin'  → opens in-app (tictactoe, stewieclicker)
+// type: 'external' → opens via about:blank injection
+// url: relative path to the local game HTML file in this repo
+// ════════════════════════════════════════════════════════════════
 const GAMES = [
   {
     id: 'tictactoe',
@@ -361,31 +344,54 @@ const GAMES = [
     emoji: '⚔️',
     tag: 'built-in',
     type: 'builtin',
+    url: '',
     banner: '',
     icon: '',
     desc: 'Classic X vs O strategy game. Two players take turns marking a 3x3 grid. First to get three in a row wins!'
+  },
+  {
+    id: 'stewieclicker',
+    name: 'Stewie Clicker',
+    emoji: '🍪',
+    tag: 'built-in',
+    type: 'builtin',
+    url: 'games/stewie-clicker/index.html',
+    banner: '',
+    icon: '',
+    desc: 'Click Stewie to earn Stewies! Buy buildings, unlock upgrades, and prestige for permanent bonuses.\n\n✨ Features:\n• 10 buildings with scaling costs\n• Upgrades including CPS multipliers\n• Prestige system (+10% bonus per level)\n• Offline progress — earn while away\n• Achievements with real bonuses\n• Import / Export save data\n\n💡 Tip: Press SPACE to click without moving your mouse!'
   },
   {
     id: 'retrobowl',
     name: 'Retro Bowl',
     emoji: '🏈',
     tag: 'sports',
-    type: 'iframe',
-    url: 'https://cdn.jsdelivr.net/gh/FailedRifle/hamburger@main/games/retro-bowl/index.html',
+    type: 'external',
+    url: 'games/retro-bowl/index.html',
     banner: 'https://cdn.jsdelivr.net/gh/FailedRifle/hamburger@main/games/retro-bowl/banner.png',
     icon: 'https://cdn.jsdelivr.net/gh/FailedRifle/hamburger@main/games/retro-bowl/icon.png',
     desc: 'Classic pixel-art American football management game.\n\nManage your team, call plays, and lead your squad to the Retro Bowl!\n\n⚠️ Save data is stored in your browser automatically.'
   },
   {
-    id: 'stewieclicker',
-    name: 'Stewie Clicker',
-    emoji: '🍪',
-    tag: 'idle',
-    type: 'iframe',
-    url: 'games/stewie-clicker/index.html',
+    id: 'sm64',
+    name: 'Super Mario 64',
+    emoji: '🌟',
+    tag: 'platformer',
+    type: 'external',
+    url: 'games/sm64/index.html',
     banner: '',
     icon: '',
-    desc: 'Click Stewie to earn Stewies! Buy buildings, unlock upgrades, and prestige for permanent bonuses.\n\n✨ Features:\n• 10 buildings with scaling costs\n• 10 upgrades including CPS multipliers\n• Prestige system (+10% bonus per level)\n• Offline progress — earn while away\n• Achievements with real bonuses\n• Golden Stewie bonus cookies\n• Import / Export save data\n\n💡 Tip: Press SPACE to click without moving your mouse!'
+    desc: 'Super Mario 64 running in the browser via WebAssembly.\n\nCollect stars, explore levels, and defeat Bowser!\n\n⚠️ Controls: Arrow keys to move, Z to jump, X to attack.\nMay take a moment to load the first time.'
+  },
+  {
+    id: 'cheeserolling',
+    name: 'Cheese Rolling',
+    emoji: '🧀',
+    tag: 'arcade',
+    type: 'external',
+    url: 'games/cheeserolling/index.html',
+    banner: '',
+    icon: '',
+    desc: 'Roll a massive cheese wheel down a hill and try not to die.\n\nBased on the legendary Cooper\'s Hill Cheese-Rolling race.\n\n⚠️ Unity WebGL game — assets stream in on first load, may take a minute.'
   },
   // ADD MORE GAMES BELOW THIS LINE:
   // {
@@ -393,29 +399,28 @@ const GAMES = [
   //   name: 'My Game',
   //   emoji: '🎮',
   //   tag: 'arcade',
-  //   type: 'iframe',
-  //   url: 'https://example.com/game',
+  //   type: 'external',
+  //   url: 'games/mygame/index.html',
   //   banner: '',
   //   icon: '',
-  //   desc: 'Description of the game here.'
+  //   desc: 'Description here.'
   // },
 ];
 
-// ══════════════════════════════════════════════════════════════════
-// DISCORD WEBHOOK — paste your webhook URL between the quotes
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
+// DISCORD WEBHOOK
+// ════════════════════════════════════════════════════════════════
 const WEBHOOK_URL = 'https://discord.com/api/webhooks/1237572671349461003/WM3oqqNdIUHPd9H6OUKRMWJAdSuJMecRwSBpeiTualhIpMV8TGJAzGj485Mlr7w79ZVm';
 
-// ══════════════════════════════════════════════════════════════════
-// CHANGELOG — fetched from your GitHub repo automatically
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
+// CHANGELOG
+// ════════════════════════════════════════════════════════════════
 const CHANGELOG_URL = 'https://raw.githubusercontent.com/AdvidFrost/bmatterOS/main/changelog.json';
 
 let scores = { X:0, O:0, draws:0 };
-let launchMode = 'app';
+let launchMode = 'blank';
 let currentReportType = null;
 
-// ── CHANGELOG ─────────────────────────────────────────────────────
 async function loadChangelog() {
   try {
     const r = await fetch(CHANGELOG_URL + '?t=' + Date.now(), { cache: 'no-store' });
@@ -435,7 +440,6 @@ async function loadChangelog() {
   } catch(e) {}
 }
 
-// ── TABS ───────────────────────────────────────────────────────────
 function switchTab(tab) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.topnav-btn').forEach(b => b.classList.remove('active'));
@@ -475,7 +479,6 @@ function buildSidebar(tab) {
   }
 }
 
-// ── GAMES GRID ─────────────────────────────────────────────────────
 function buildGamesGrid(filter, filterFn) {
   const grid = document.getElementById('games-grid');
   let list = GAMES;
@@ -506,22 +509,17 @@ function buildFeatured() {
 
 function filterGames(val) { buildGamesGrid(val); }
 
-// ── GAME DETAIL PAGE ───────────────────────────────────────────────
 function openDetail(id) {
   const game = GAMES.find(g => g.id === id);
   if (!game) return;
-
   document.getElementById('games-list-view').style.display = 'none';
-  const detail = document.getElementById('game-detail');
-  detail.classList.add('show');
-
+  document.getElementById('game-detail').classList.add('show');
   const banner = document.getElementById('detail-banner');
   if (game.banner) {
-    banner.innerHTML = `<img src="${game.banner}" onerror="this.innerHTML='<span class=detail-banner-emoji>${game.emoji}</span>'">`;
+    banner.innerHTML = `<img src="${game.banner}" onerror="this.style.display='none'">`;
   } else {
     banner.innerHTML = `<span class="detail-banner-emoji">${game.emoji}</span>`;
   }
-
   document.getElementById('detail-title').textContent = game.name;
   document.getElementById('detail-tag').textContent = game.tag.toUpperCase();
   document.getElementById('detail-desc').textContent = game.desc;
@@ -533,41 +531,52 @@ function closeDetail() {
   document.getElementById('game-detail').classList.remove('show');
 }
 
-// ── GAME LAUNCH ────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// GAME LAUNCH
+// Built-in games open in the in-app overlay.
+// External games always open via about:blank injection — the
+// bootstrap fetches the local game file (same-origin, no CORS)
+// which has a <base href> pointing to CDN assets.
+// ════════════════════════════════════════════════════════════════
 function launchGame(game) {
   if (game.type === 'builtin') {
     document.getElementById('overlay-title').textContent = game.name;
     const content = document.getElementById('game-content');
-    if (game.id === 'tictactoe') { content.innerHTML = buildTTT(); initTTT(); }
+    if (game.id === 'tictactoe') {
+      content.innerHTML = buildTTT();
+      initTTT();
+    } else if (game.url) {
+      // Local same-origin file — safe to iframe
+      content.innerHTML = `<iframe src="${game.url}" style="width:100%;height:100%;border:none;" allowfullscreen></iframe>`;
+    }
     document.getElementById('game-overlay').classList.add('open');
     return;
   }
 
-  const mode = launchMode;
+  // Resolve the game's absolute URL from the current page location
+  const gameAbsUrl = new URL(game.url, window.location.href).href;
 
-  if (mode === 'app') {
-    document.getElementById('overlay-title').textContent = game.name;
-    document.getElementById('game-content').innerHTML =
-      `<iframe src="${game.url}" style="width:100%;height:100%;border:none;" allowfullscreen></iframe>`;
-    document.getElementById('game-overlay').classList.add('open');
+  // Bootstrap injected into about:blank — fetches local game HTML and writes it
+  const bootstrap =
+    `<!doctype html><html><head><title>${game.name}</title>` +
+    `<style>*{margin:0;padding:0;}html,body{width:100%;height:100%;overflow:hidden;background:#000;}</style></head>` +
+    `<body><script>(async()=>{try{` +
+    `const r=await fetch('${gameAbsUrl}?t='+Date.now(),{cache:'no-store'});` +
+    `const h=await r.text();` +
+    `document.open();document.write(h);document.close();` +
+    `}catch(e){document.body.innerHTML='<div style="color:#fff;padding:20px;font-family:sans-serif;">Failed to load: '+e.message+'</div>';}` +
+    `})();<\/script></body></html>`;
 
-  } else if (mode === 'blank') {
-    // Open in a new about:blank tab with the game in a full-page iframe
+  if (launchMode === 'blank') {
     const win = window.open('about:blank#bmos/' + game.id, '_blank');
     if (!win) { alert('Pop-ups are blocked! Please allow pop-ups for this site.'); return; }
     win.document.open();
-    win.document.write(
-      `<!doctype html><html><head><title>${game.name}</title>` +
-      `<style>*{margin:0;padding:0;}html,body{width:100%;height:100%;overflow:hidden;background:#000;}` +
-      `iframe{width:100%;height:100%;border:none;display:block;}</style></head>` +
-      `<body><iframe src="${game.url}" allowfullscreen></iframe></body></html>`
-    );
+    win.document.write(bootstrap);
     win.document.close();
 
-  } else if (mode === 'window') {
-    // Open in a resizable popup window with the game in a full-page iframe
-    const w = Math.round(screen.availWidth * 0.7);
-    const h = Math.round(screen.availHeight * 0.75);
+  } else if (launchMode === 'window') {
+    const w = Math.round(screen.availWidth * 0.75);
+    const h = Math.round(screen.availHeight * 0.8);
     const l = Math.round((screen.availWidth - w) / 2);
     const t = Math.round((screen.availHeight - h) / 2);
     const win = window.open(
@@ -576,12 +585,7 @@ function launchGame(game) {
     );
     if (!win) { alert('Pop-ups are blocked! Please allow pop-ups for this site.'); return; }
     win.document.open();
-    win.document.write(
-      `<!doctype html><html><head><title>${game.name}</title>` +
-      `<style>*{margin:0;padding:0;}html,body{width:100%;height:100%;overflow:hidden;background:#000;}` +
-      `iframe{width:100%;height:100%;border:none;display:block;}</style></head>` +
-      `<body><iframe src="${game.url}" allowfullscreen></iframe></body></html>`
-    );
+    win.document.write(bootstrap);
     win.document.close();
   }
 }
@@ -591,10 +595,8 @@ function closeGame() {
   document.getElementById('game-content').innerHTML = '';
 }
 
-// ── LAUNCH MODE SETTING ────────────────────────────────────────────
 const LM_DESCS = {
-  app: 'Opens inside the bmatterOS window',
-  blank: 'Opens in a new about:blank browser tab (like CheddarOS)',
+  blank:  'Opens in a new about:blank browser tab',
   window: 'Opens in a separate resizable popup window'
 };
 
@@ -606,7 +608,7 @@ function setLaunchMode(mode) {
   try { localStorage.setItem('bmos-launch', mode); } catch(e) {}
 }
 
-// ── TTT ────────────────────────────────────────────────────────────
+// TTT
 function buildTTT() {
   return `<div class="ttt-wrap">
     <div class="score-row">X wins: <span id="sx">0</span> &nbsp;·&nbsp; O wins: <span id="so">0</span> &nbsp;·&nbsp; Draws: <span id="sd">0</span></div>
@@ -621,12 +623,10 @@ function initTTT(){tttBoard=Array(9).fill('');tttTurn='X';tttDone=false;const sx
 function tttClick(i){if(tttDone||tttBoard[i])return;tttBoard[i]=tttTurn;const c=document.getElementById('c'+i);c.textContent=tttTurn;c.classList.add('filled',tttTurn.toLowerCase());const win=WINS.find(w=>w.every(j=>tttBoard[j]===tttTurn));if(win){win.forEach(j=>document.getElementById('c'+j).classList.add('win'));document.getElementById('ttt-status').innerHTML=`<span>${tttTurn}</span> wins!`;scores[tttTurn]++;document.getElementById('s'+tttTurn.toLowerCase()).textContent=scores[tttTurn];tttDone=true;return;}if(tttBoard.every(c=>c)){document.getElementById('ttt-status').innerHTML='Draw!';scores.draws++;document.getElementById('sd').textContent=scores.draws;tttDone=true;return;}tttTurn=tttTurn==='X'?'O':'X';document.getElementById('ttt-status').innerHTML=`Your turn — <span>${tttTurn}</span>`;}
 function tttReset(){tttBoard=Array(9).fill('');tttTurn='X';tttDone=false;for(let i=0;i<9;i++){const c=document.getElementById('c'+i);if(c){c.textContent='';c.className='ttt-cell';c.onclick=()=>tttClick(i);}}document.getElementById('ttt-status').innerHTML='Your turn — <span>X</span>';}
 
-// ── SETTINGS ───────────────────────────────────────────────────────
 function setTheme(theme){document.body.setAttribute('data-theme',theme==='red'?'':theme);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));document.getElementById('theme-'+theme).classList.add('active');try{localStorage.setItem('bmos-theme',theme);}catch(e){}}
 function toggleSidebar(on){document.getElementById('sidebar').style.display=on?'':'none';}
 function toggleCompact(on){document.body.style.setProperty('--topbar-h',on?'40px':'48px');document.querySelectorAll('.tab-panel').forEach(p=>{p.style.padding=on?'1rem':'1.5rem';});}
 
-// ── SUPPORT ────────────────────────────────────────────────────────
 function showSupportForm(type) {
   currentReportType = type;
   const isBug = type === 'bug';
@@ -655,12 +655,10 @@ async function submitReport() {
   const desc = document.getElementById('f-desc').value.trim();
   const statusEl = document.getElementById('form-status');
   const btn = document.getElementById('form-submit-btn');
-
   statusEl.className = 'form-status';
   if (!title) { statusEl.className='form-status error'; statusEl.textContent='Please fill in the title.'; return; }
   if (!desc)  { statusEl.className='form-status error'; statusEl.textContent='Please fill in the description.'; return; }
-  if (!WEBHOOK_URL) { statusEl.className='form-status error'; statusEl.textContent='Support is not configured yet. Check back soon!'; return; }
-
+  if (!WEBHOOK_URL) { statusEl.className='form-status error'; statusEl.textContent='Support is not configured yet.'; return; }
   btn.disabled = true; btn.textContent = 'Sending...';
   const isBug = currentReportType === 'bug';
   const embed = {
@@ -687,11 +685,10 @@ async function submitReport() {
   } finally { btn.disabled=false; btn.textContent='Submit'; }
 }
 
-// ── TERMINAL LOADER ────────────────────────────────────────────────
 const tlContent = document.getElementById('tl-content');
 const tlDelay = ms => new Promise(r => setTimeout(r, ms));
 function tlAdd(html){const d=document.createElement('div');d.className='tl';d.innerHTML=html;tlContent.appendChild(d);document.getElementById('terminal-loader').scrollTop=99999;}
-const TL_ITEMS=['core.sys','renderer.js','theme.engine','sidebar.nav','games.registry','retrobowl.mod','tictactoe.mod','stewieclicker.mod','settings.cfg','ui.framework','cloak.ready'];
+const TL_ITEMS=['core.sys','renderer.js','theme.engine','sidebar.nav','games.registry','retrobowl.mod','sm64.mod','cheeserolling.mod','tictactoe.mod','stewieclicker.mod','settings.cfg','cloak.ready'];
 async function runLoader(){
   tlAdd('bmatterOS Terminal [v1.0.0]');
   tlAdd('(c) bmatterOS. All rights reserved.<br>');
@@ -699,7 +696,7 @@ async function runLoader(){
   tlAdd('C:\\Users\\bmatter&gt; <span class="tl-red">bmatteros --init</span>');
   await tlDelay(150);
   tlAdd('Initializing system modules...<br>');
-  for(const item of TL_ITEMS){await tlDelay(150);tlAdd(`FETCHED [${item}] -&gt; <span class="tl-red">READY</span>`);}
+  for(const item of TL_ITEMS){await tlDelay(130);tlAdd(`FETCHED [${item}] -&gt; <span class="tl-red">READY</span>`);}
   await tlDelay(300);
   tlAdd('<br><span class="tl-red">All systems ready. Starting bmatterOS...</span>');
   await tlDelay(400);
@@ -707,14 +704,16 @@ async function runLoader(){
   document.getElementById('app').classList.add('visible');
 }
 
-// ── INIT ───────────────────────────────────────────────────────────
 (function init(){
   buildGamesGrid();
   buildFeatured();
   buildSidebar('home');
   document.getElementById('searchbox').style.display='none';
   try{const t=localStorage.getItem('bmos-theme');if(t)setTheme(t);}catch(e){}
-  try{const l=localStorage.getItem('bmos-launch');if(l)setLaunchMode(l);}catch(e){}
+  try{
+    const l=localStorage.getItem('bmos-launch');
+    if(l==='blank'||l==='window') setLaunchMode(l);
+  }catch(e){}
   loadChangelog();
   runLoader();
 })();
