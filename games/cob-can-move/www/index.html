@@ -1,370 +1,327 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-	<title>COBB CAN MOVE</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-	<meta name="generator" content="Scirra Construct">
-	<link rel="icon" type="image/png" href="icons/icon-512.png">
-	<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>COBB CAN MOVE</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
+  <meta name="generator" content="Scirra Construct">
+  <link rel="icon" type="image/png" href="icons/icon-512.png">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    #bmos-badge{position:fixed;bottom:8px;right:8px;z-index:99999;background:rgba(0,0,0,.8);border:1px solid #e53e3e;border-radius:5px;padding:4px 9px;font:11px 'Courier New',monospace;color:#e53e3e;cursor:pointer;user-select:none;letter-spacing:.08em;}
+    #bmos-badge:hover{background:rgba(229,62,62,.15);}
+    .bd{display:inline-block;width:5px;height:5px;border-radius:50%;background:#e53e3e;margin-right:4px;vertical-align:middle;animation:bp 1.8s infinite;}
+    @keyframes bp{0%,100%{opacity:1}50%{opacity:.25}}
+    #bmos-menu{display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.55);align-items:center;justify-content:center;}
+    #bmos-menu.open{display:flex;}
+    #bmos-panel{background:#0d0d0d;border:1px solid #333;border-radius:7px;width:310px;max-width:94vw;max-height:90vh;overflow-y:auto;font:12px 'Courier New',monospace;color:#bbb;}
+    #bmos-panel::-webkit-scrollbar{width:4px;}
+    #bmos-panel::-webkit-scrollbar-thumb{background:#333;}
+    .ph{background:#111;border-bottom:1px solid #222;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1;}
+    .pt{color:#e53e3e;font-size:12px;letter-spacing:.12em;}
+    .px{background:none;border:1px solid #333;color:#666;font:11px 'Courier New',monospace;padding:2px 7px;border-radius:4px;cursor:pointer;}
+    .px:hover{border-color:#e53e3e;color:#e53e3e;}
+    .pb{padding:10px 12px;}
+    .sl{font-size:9px;color:#444;letter-spacing:.18em;text-transform:uppercase;margin:10px 0 5px;}
+    .sl:first-child{margin-top:0;}
+    .br{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;}
+    .bb{flex:1;min-width:55px;background:#141414;border:1px solid #222;border-radius:4px;color:#777;font:11px 'Courier New',monospace;padding:5px 3px;cursor:pointer;text-align:center;transition:border-color .1s,color .1s;}
+    .bb:hover{border-color:#555;color:#ccc;}
+    .bb.on{border-color:#e53e3e;color:#e53e3e;background:rgba(229,62,62,.08);}
+    .bb.ok{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.08);}
+    .bb.warn{border-color:#f97316;color:#f97316;}
+    hr.div{border:none;border-top:1px solid #1a1a1a;margin:8px 0;}
+    #bmos-log{font-size:10px;color:#555;min-height:16px;margin-top:6px;word-break:break-all;}
+    #bmos-objs{font-size:10px;color:#444;margin-top:5px;line-height:1.7;max-height:100px;overflow-y:auto;}
+  </style>
 
-	<style>
-	/* bmatterOS badge */
-	#bmos-badge {
-		position: fixed;
-		bottom: 10px;
-		right: 10px;
-		z-index: 99999;
-		background: rgba(0,0,0,0.75);
-		border: 1px solid #e53e3e;
-		border-radius: 6px;
-		padding: 5px 10px;
-		font-family: 'Courier New', monospace;
-		font-size: 11px;
-		color: #e53e3e;
-		cursor: pointer;
-		user-select: none;
-		letter-spacing: 0.08em;
-		text-shadow: 0 0 8px rgba(229,62,62,0.6);
-		box-shadow: 0 0 10px rgba(229,62,62,0.2);
-		transition: all 0.15s;
-	}
-	#bmos-badge:hover {
-		background: rgba(229,62,62,0.15);
-		box-shadow: 0 0 16px rgba(229,62,62,0.4);
-	}
-	#bmos-badge .bmos-dot {
-		display: inline-block;
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: #e53e3e;
-		box-shadow: 0 0 6px #e53e3e;
-		margin-right: 5px;
-		vertical-align: middle;
-		animation: bmos-pulse 1.8s infinite;
-	}
-	@keyframes bmos-pulse {
-		0%,100% { opacity:1; }
-		50% { opacity:0.3; }
-	}
-
-	/* mod menu overlay */
-	#bmos-menu {
-		display: none;
-		position: fixed;
-		top: 0; left: 0; right: 0; bottom: 0;
-		z-index: 100000;
-		background: rgba(0,0,0,0.6);
-		backdrop-filter: blur(4px);
-		align-items: center;
-		justify-content: center;
-	}
-	#bmos-menu.open { display: flex; }
-	#bmos-panel {
-		background: #0d0d0d;
-		border: 1px solid #e53e3e;
-		border-radius: 8px;
-		padding: 0;
-		width: 320px;
-		max-width: 92vw;
-		box-shadow: 0 0 40px rgba(229,62,62,0.25);
-		font-family: 'Courier New', monospace;
-		overflow: hidden;
-	}
-	#bmos-panel-header {
-		background: rgba(229,62,62,0.12);
-		border-bottom: 1px solid #e53e3e;
-		padding: 12px 16px;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-	#bmos-panel-title {
-		color: #e53e3e;
-		font-size: 13px;
-		font-weight: bold;
-		letter-spacing: 0.15em;
-		text-shadow: 0 0 10px rgba(229,62,62,0.6);
-	}
-	#bmos-panel-close {
-		background: none;
-		border: 1px solid #333;
-		color: #666;
-		font-size: 12px;
-		padding: 2px 8px;
-		border-radius: 4px;
-		cursor: pointer;
-		font-family: inherit;
-		transition: all 0.12s;
-	}
-	#bmos-panel-close:hover { border-color: #e53e3e; color: #e53e3e; }
-	#bmos-panel-body { padding: 14px 16px; }
-	.bmos-section {
-		margin-bottom: 14px;
-	}
-	.bmos-section-label {
-		font-size: 9px;
-		color: #555;
-		letter-spacing: 0.2em;
-		text-transform: uppercase;
-		margin-bottom: 7px;
-	}
-	.bmos-row {
-		display: flex;
-		gap: 6px;
-		flex-wrap: wrap;
-	}
-	.bmos-btn {
-		flex: 1;
-		min-width: 60px;
-		background: #1a1a1a;
-		border: 1px solid #2a2a2a;
-		border-radius: 5px;
-		color: #888;
-		font-family: inherit;
-		font-size: 11px;
-		padding: 6px 4px;
-		cursor: pointer;
-		transition: all 0.12s;
-		text-align: center;
-	}
-	.bmos-btn:hover { border-color: #555; color: #ccc; }
-	.bmos-btn.active { border-color: #e53e3e; color: #e53e3e; background: rgba(229,62,62,0.1); }
-	.bmos-divider { border: none; border-top: 1px solid #1e1e1e; margin: 12px 0; }
-	.bmos-footer {
-		font-size: 9px;
-		color: #333;
-		text-align: center;
-		letter-spacing: 0.1em;
-		padding: 0 0 4px;
-	}
-	</style>
-
-	<!-- WebView2 polyfill — game was exported as Windows wrapper; simulate handshake so runtime doesn't hang -->
-	<script>
-	(function() {
-		if (!window.chrome) window.chrome = {};
-		if (!window.chrome.webview) {
-			var _listeners = {};
-			window.chrome.webview = {
-				addEventListener: function(type, fn) { _listeners[type] = fn; },
-				removeEventListener: function() {},
-				postMessage: function(dataStr) {
-					try {
-						var msg = JSON.parse(dataStr);
-						if (msg.type === 'wrapper-init' && _listeners['message']) {
-							setTimeout(function() {
-								_listeners['message']({
-									data: { type: 'wrapper-init-response', registeredComponentIds: [] },
-									additionalObjects: null
-								});
-							}, 0);
-						}
-					} catch(e) {}
-				}
-			};
-		}
-	})();
-	</script>
+  <!-- WebView2 polyfill: reply to wrapper-init so runtime doesn't hang -->
+  <script>
+  (function(){
+    if(!window.chrome)window.chrome={};
+    if(!window.chrome.webview){
+      var L={};
+      window.chrome.webview={
+        addEventListener:function(t,f){L[t]=f;},
+        removeEventListener:function(){},
+        postMessage:function(s){
+          try{var m=JSON.parse(s);if(m.type==='wrapper-init'&&L.message)setTimeout(function(){L.message({data:{type:'wrapper-init-response',registeredComponentIds:[]},additionalObjects:null});},0);}catch(e){}
+        }
+      };
+    }
+  })();
+  </script>
 </head>
 <body>
+  <noscript><div id="notSupportedWrap"><h2 id="notSupportedTitle">This content requires JavaScript</h2><p class="notSupportedMessage">JavaScript appears to be disabled.</p></div></noscript>
+  <script src="scripts/modernjscheck.js"></script>
+  <script src="scripts/supportcheck.js"></script>
+  <script src="scripts/main.js" type="module"></script>
 
-	<noscript>
-		<div id="notSupportedWrap">
-			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
-			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
-		</div>
-	</noscript>
-	<script src="scripts/modernjscheck.js"></script>
-	<script src="scripts/supportcheck.js"></script>
-	<script src="scripts/main.js" type="module"></script>
+  <div id="bmos-badge" onclick="bmosOpen()"><span class="bd"></span>bmOS</div>
 
-	<!-- bmatterOS badge (always visible, click to open mod menu) -->
-	<div id="bmos-badge" onclick="bmosOpenMenu()">
-		<span class="bmos-dot"></span>bmatterOS
-	</div>
+  <div id="bmos-menu" onclick="if(event.target===this)bmosClose()">
+    <div id="bmos-panel">
+      <div class="ph">
+        <span class="pt">⚡ bmatterOS MODS</span>
+        <button class="px" onclick="bmosClose()">✕</button>
+      </div>
+      <div class="pb">
 
-	<!-- mod menu -->
-	<div id="bmos-menu" onclick="bmosMenuBgClick(event)">
-		<div id="bmos-panel">
-			<div id="bmos-panel-header">
-				<div id="bmos-panel-title">⚡ BMOS MOD MENU</div>
-				<button id="bmos-panel-close" onclick="bmosCloseMenu()">✕ Close</button>
-			</div>
-			<div id="bmos-panel-body">
+        <div class="sl">Speed (timestamp-scaled, zero lag)</div>
+        <div class="br">
+          <button class="bb" id="bs0" onclick="bmosSpeed(0.25,'bs0')">0.25x</button>
+          <button class="bb" id="bs1" onclick="bmosSpeed(0.5,'bs1')">0.5x</button>
+          <button class="bb on" id="bs2" onclick="bmosSpeed(1,'bs2')">1x</button>
+          <button class="bb" id="bs3" onclick="bmosSpeed(2,'bs3')">2x</button>
+          <button class="bb" id="bs4" onclick="bmosSpeed(4,'bs4')">4x</button>
+          <button class="bb" id="bs5" onclick="bmosSpeed(8,'bs5')">8x</button>
+        </div>
 
-				<div class="bmos-section">
-					<div class="bmos-section-label">Game Speed</div>
-					<div class="bmos-row">
-						<button class="bmos-btn" id="bmos-speed-0" onclick="bmosSetSpeed(0.3,'bmos-speed-0')">🐢 Slow</button>
-						<button class="bmos-btn active" id="bmos-speed-1" onclick="bmosSetSpeed(1,'bmos-speed-1')">▶ Normal</button>
-						<button class="bmos-btn" id="bmos-speed-2" onclick="bmosSetSpeed(2,'bmos-speed-2')">⚡ Fast</button>
-						<button class="bmos-btn" id="bmos-speed-3" onclick="bmosSetSpeed(4,'bmos-speed-3')">🚀 Turbo</button>
-					</div>
-				</div>
+        <hr class="div">
+        <div class="sl">Playback</div>
+        <div class="br">
+          <button class="bb" id="bpause" onclick="bmosPause()">⏸ Pause</button>
+          <button class="bb" onclick="bmosStep()">⏭ Step</button>
+          <button class="bb" onclick="bmosFullscreen()">⛶ Fullscreen</button>
+        </div>
 
-				<hr class="bmos-divider">
+        <hr class="div">
+        <div class="sl">Visual Filter</div>
+        <div class="br">
+          <button class="bb on" id="bf0" onclick="bmosFx('','bf0')">None</button>
+          <button class="bb" id="bf1" onclick="bmosFx('contrast(1.15) brightness(.85) saturate(1.2)','bf1')">CRT</button>
+          <button class="bb" id="bf2" onclick="bmosFx('saturate(3) contrast(1.2)','bf2')">Neon</button>
+          <button class="bb" id="bf3" onclick="bmosFx('sepia(.5) hue-rotate(180deg) brightness(.65)','bf3')">Night</button>
+          <button class="bb" id="bf4" onclick="bmosFx('grayscale(1)','bf4')">B&amp;W</button>
+          <button class="bb" id="bf5" onclick="bmosFx('invert(1)','bf5')">Invert</button>
+        </div>
 
-				<div class="bmos-section">
-					<div class="bmos-section-label">Visual Filter</div>
-					<div class="bmos-row">
-						<button class="bmos-btn active" id="bmos-fx-none" onclick="bmosSetFx('none','bmos-fx-none')">◎ Normal</button>
-						<button class="bmos-btn" id="bmos-fx-crt" onclick="bmosSetFx('crt','bmos-fx-crt')">📺 CRT</button>
-						<button class="bmos-btn" id="bmos-fx-neon" onclick="bmosSetFx('neon','bmos-fx-neon')">🌈 Neon</button>
-					</div>
-					<div class="bmos-row" style="margin-top:6px">
-						<button class="bmos-btn" id="bmos-fx-night" onclick="bmosSetFx('night','bmos-fx-night')">🌙 Night</button>
-						<button class="bmos-btn" id="bmos-fx-gray" onclick="bmosSetFx('gray','bmos-fx-gray')">⬜ B&amp;W</button>
-						<button class="bmos-btn" id="bmos-fx-invert" onclick="bmosSetFx('invert','bmos-fx-invert')">🔃 Invert</button>
-					</div>
-				</div>
+        <hr class="div">
+        <div class="sl">Zoom</div>
+        <div class="br">
+          <button class="bb" onclick="bmosZoom(.8)">－</button>
+          <button class="bb" onclick="bmosZoom(1/0.8)">＋</button>
+          <button class="bb" onclick="bmosZoomReset()">Reset</button>
+          <button class="bb" onclick="bmosScreenshot()">📷 Shot</button>
+        </div>
 
-				<hr class="bmos-divider">
+        <hr class="div">
+        <div class="sl">Game Object Hacks</div>
+        <div class="br">
+          <button class="bb" onclick="bmosHack('spawn_coal')">🪨 Spawn Coal</button>
+          <button class="bb" onclick="bmosHack('dupe_cobb')">👤 Dupe Cobb</button>
+        </div>
+        <div class="br">
+          <button class="bb" onclick="bmosHack('giant')">🔼 Giant Cobb</button>
+          <button class="bb" onclick="bmosHack('tiny')">🔽 Tiny Cobb</button>
+          <button class="bb" onclick="bmosHack('reset_size')">↺ Norm Size</button>
+        </div>
+        <div class="br">
+          <button class="bb" onclick="bmosHack('tp_spawn')">⬆ To Spawn</button>
+          <button class="bb" onclick="bmosHack('kill_all')">💀 Kill Objs</button>
+          <button class="bb" onclick="bmosHack('list_objs')">📋 List Objs</button>
+        </div>
+        <div id="bmos-log"></div>
+        <div id="bmos-objs"></div>
 
-				<div class="bmos-section">
-					<div class="bmos-section-label">Misc</div>
-					<div class="bmos-row">
-						<button class="bmos-btn" id="bmos-fs" onclick="bmosFullscreen()">⛶ Fullscreen</button>
-						<button class="bmos-btn" id="bmos-zoom-in" onclick="bmosZoom(1.2)">🔍 Zoom In</button>
-						<button class="bmos-btn" id="bmos-zoom-out" onclick="bmosZoom(1/1.2)">🔎 Zoom Out</button>
-					</div>
-					<div class="bmos-row" style="margin-top:6px">
-						<button class="bmos-btn" id="bmos-zoom-reset" onclick="bmosZoomReset()">↺ Reset Zoom</button>
-						<button class="bmos-btn" id="bmos-screenshot" onclick="bmosScreenshot()">📷 Screenshot</button>
-					</div>
-				</div>
+      </div>
+    </div>
+  </div>
 
-				<div class="bmos-footer">bmatterOS mod menu · press M to toggle</div>
-			</div>
-		</div>
-	</div>
+<script>
+// ── Speed: timestamp scaling — one RAF per frame, just advance virtual time faster/slower ──
+var _spd = 1, _vt = null, _lr = null, _paused = false, _stepOnce = false;
+var _oRAF = window.requestAnimationFrame.bind(window);
+var _oCAF = window.cancelAnimationFrame.bind(window);
 
-	<script>
-	// ── speed hack via RAF wrapping ──────────────────────────────────────────
-	var _bmosSpeed = 1;
-	var _bmosRafAcc = 0;
-	var _bmosLastReal = null;
-	var _bmosOrigRAF = window.requestAnimationFrame.bind(window);
-	var _bmosOrigCAF = window.cancelAnimationFrame.bind(window);
-	var _bmosCallbacks = new Map();
-	var _bmosIdCounter = 1;
+window.requestAnimationFrame = function(cb){
+  return _oRAF(function(real){
+    if(_paused && !_stepOnce){ window.requestAnimationFrame(cb); return; }
+    _stepOnce = false;
+    if(_spd === 1){ _vt=null; _lr=null; cb(real); return; }
+    if(_vt===null){ _vt=real; _lr=real; }
+    var d = real-_lr; _lr=real;
+    _vt += d*_spd;
+    cb(_vt);
+  });
+};
+window.cancelAnimationFrame = _oCAF;
 
-	window.requestAnimationFrame = function(cb) {
-		var id = _bmosIdCounter++;
-		_bmosCallbacks.set(id, cb);
-		_bmosOrigRAF(function(ts) {
-			if (!_bmosCallbacks.has(id)) return;
-			_bmosCallbacks.delete(id);
-			if (_bmosSpeed === 1) { cb(ts); return; }
-			// accumulate fractional frames for slow/fast
-			if (_bmosLastReal === null) _bmosLastReal = ts;
-			var real = ts - _bmosLastReal;
-			_bmosLastReal = ts;
-			_bmosRafAcc += real * _bmosSpeed;
-			if (_bmosRafAcc >= 16) {
-				var steps = Math.floor(_bmosRafAcc / 16);
-				_bmosRafAcc %= 16;
-				for (var i = 0; i < steps; i++) cb(ts + i * 16);
-			} else if (_bmosSpeed < 1) {
-				// slow: only fire when accumulated enough
-				if (_bmosRafAcc > 0) cb(ts);
-			} else {
-				cb(ts);
-			}
-		});
-		return id;
-	};
-	window.cancelAnimationFrame = function(id) {
-		_bmosCallbacks.delete(id);
-		_bmosOrigCAF(id);
-	};
+function bmosSpeed(s,id){
+  _spd=s; _vt=null; _lr=null;
+  document.querySelectorAll('[id^="bs"]').forEach(function(b){b.classList.remove('on');});
+  document.getElementById(id).classList.add('on');
+}
 
-	function bmosSetSpeed(s, btnId) {
-		_bmosSpeed = s;
-		_bmosLastReal = null;
-		_bmosRafAcc = 0;
-		document.querySelectorAll('[id^="bmos-speed-"]').forEach(function(b) { b.classList.remove('active'); });
-		document.getElementById(btnId).classList.add('active');
-	}
+function bmosPause(){
+  _paused=!_paused;
+  var b=document.getElementById('bpause');
+  b.textContent=_paused?'▶ Resume':'⏸ Pause';
+  b.classList.toggle('on',_paused);
+}
+function bmosStep(){ _stepOnce=true; }
 
-	// ── visual filters ───────────────────────────────────────────────────────
-	var _bmosZoom = 1;
-	var _bmosFilterStyle = document.createElement('style');
-	document.head.appendChild(_bmosFilterStyle);
+// ── Filters via MutationObserver — apply once, re-apply if new canvases added ──
+var _fx='', _zoom=1;
+function bmosApplyFx(){
+  document.querySelectorAll('canvas').forEach(function(c){
+    c.style.filter=_fx;
+    c.style.transform=_zoom===1?'':'scale('+_zoom+')';
+    c.style.transformOrigin='center center';
+  });
+}
+// watch for canvases added dynamically (Construct creates them after load)
+new MutationObserver(bmosApplyFx).observe(document.body,{childList:true,subtree:true});
 
-	var _bmosFilters = {
-		none:   '',
-		crt:    'contrast(1.1) brightness(0.9) saturate(1.1)',
-		neon:   'saturate(3) contrast(1.2) hue-rotate(15deg)',
-		night:  'sepia(0.4) hue-rotate(180deg) brightness(0.7) saturate(1.5)',
-		gray:   'grayscale(1)',
-		invert: 'invert(1)'
-	};
+function bmosFx(f,id){
+  _fx=f;
+  document.querySelectorAll('[id^="bf"]').forEach(function(b){b.classList.remove('on');});
+  document.getElementById(id).classList.add('on');
+  bmosApplyFx();
+}
+function bmosZoom(f){ _zoom=Math.min(3,Math.max(0.2,_zoom*f)); bmosApplyFx(); }
+function bmosZoomReset(){ _zoom=1; bmosApplyFx(); }
 
-	function bmosApplyFx() {
-		var canvas = document.querySelector('canvas');
-		if (canvas) canvas.style.filter = _bmosFilters[_bmosCurFx] || '';
-		document.querySelectorAll('canvas').forEach(function(c) {
-			c.style.filter = _bmosFilters[_bmosCurFx] || '';
-			c.style.transform = 'scale(' + _bmosZoom + ')';
-			c.style.transformOrigin = 'center center';
-		});
-	}
+function bmosFullscreen(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(function(){});
+  else document.exitFullscreen().catch(function(){});
+}
 
-	var _bmosCurFx = 'none';
-	function bmosSetFx(name, btnId) {
-		_bmosCurFx = name;
-		document.querySelectorAll('[id^="bmos-fx-"]').forEach(function(b) { b.classList.remove('active'); });
-		document.getElementById(btnId).classList.add('active');
-		bmosApplyFx();
-		// re-apply on DOM changes (canvas may not exist yet)
-		setTimeout(bmosApplyFx, 500);
-		setTimeout(bmosApplyFx, 1500);
-	}
+function bmosScreenshot(){
+  var c=document.querySelector('canvas');
+  if(!c){bmosLog('No canvas yet — launch game first');return;}
+  try{var a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='cobb-'+Date.now()+'.png';a.click();}
+  catch(e){bmosLog('Shot failed: '+e.message);}
+}
 
-	function bmosZoom(factor) {
-		_bmosZoom = Math.min(3, Math.max(0.3, _bmosZoom * factor));
-		bmosApplyFx();
-	}
-	function bmosZoomReset() { _bmosZoom = 1; bmosApplyFx(); }
+// ── Runtime accessor ──────────────────────────────────────────────────────────
+function bmosRT(){ return window.c3_runtimeInterface&&window.c3_runtimeInterface._localRuntime; }
 
-	// ── screenshot ───────────────────────────────────────────────────────────
-	function bmosScreenshot() {
-		var canvas = document.querySelector('canvas');
-		if (!canvas) { alert('No canvas found — try again after the game loads.'); return; }
-		try {
-			var url = canvas.toDataURL('image/png');
-			var a = document.createElement('a');
-			a.href = url;
-			a.download = 'cobb-can-move-' + Date.now() + '.png';
-			a.click();
-		} catch(e) { alert('Screenshot failed (canvas may be protected): ' + e.message); }
-	}
+function bmosGetTypes(){
+  var rt=bmosRT(); if(!rt) return null;
+  // C3 stores object types in _objectTypes (Map) or similar
+  return rt._objectTypes||rt._objectTypesByName||null;
+}
 
-	// ── fullscreen ───────────────────────────────────────────────────────────
-	function bmosFullscreen() {
-		if (!document.fullscreenElement) {
-			document.documentElement.requestFullscreen().catch(function(){});
-		} else {
-			document.exitFullscreen().catch(function(){});
-		}
-	}
+function bmosGetInsts(nameHint){
+  var types=bmosGetTypes(); if(!types) return [];
+  var out=[];
+  types.forEach(function(t){
+    var n=(t._name||t.name||'').toLowerCase();
+    if(!nameHint||n.includes(nameHint.toLowerCase())){
+      var arr=t._instances||t.instances||[];
+      arr.forEach(function(i){ out.push({type:t,inst:i,name:n}); });
+    }
+  });
+  return out;
+}
 
-	// ── menu open/close ──────────────────────────────────────────────────────
-	function bmosOpenMenu() { document.getElementById('bmos-menu').classList.add('open'); }
-	function bmosCloseMenu() { document.getElementById('bmos-menu').classList.remove('open'); }
-	function bmosMenuBgClick(e) { if (e.target === document.getElementById('bmos-menu')) bmosCloseMenu(); }
+function bmosLog(msg){ document.getElementById('bmos-log').textContent='> '+msg; }
 
-	// press M to toggle
-	document.addEventListener('keydown', function(e) {
-		if (e.key === 'm' || e.key === 'M') {
-			var menu = document.getElementById('bmos-menu');
-			menu.classList.contains('open') ? bmosCloseMenu() : bmosOpenMenu();
-		}
-		if (e.key === 'Escape') bmosCloseMenu();
-	});
-	</script>
+// ── Object hacks ─────────────────────────────────────────────────────────────
+function bmosHack(cmd){
+  var rt=bmosRT();
+  if(cmd==='list_objs'){
+    var types=bmosGetTypes();
+    if(!types){ bmosLog('Runtime not ready yet'); return; }
+    var names=[];
+    types.forEach(function(t){ names.push(t._name||t.name||'?'); });
+    document.getElementById('bmos-objs').textContent=names.join(', ')||'(none found)';
+    bmosLog('Found '+names.length+' types');
+    return;
+  }
 
+  if(cmd==='spawn_coal'){
+    // find coal-ish object, clone near player
+    var cobbs=bmosGetInsts('cobb');
+    if(!cobbs.length) cobbs=bmosGetInsts('player');
+    var px=200,py=200;
+    if(cobbs.length){ px=cobbs[0].inst._x||cobbs[0].inst.x||px; py=cobbs[0].inst._y||cobbs[0].inst.y||py; }
+    var coals=bmosGetInsts('coal');
+    if(!coals.length) coals=bmosGetInsts('rock');
+    if(!coals.length) coals=bmosGetInsts('obstacle');
+    if(!coals.length){ bmosLog('Coal object not found — use List Objs'); return; }
+    try{
+      var src=coals[0].inst;
+      var layout=rt._currentLayout||rt.layout;
+      var layer=layout._layers[0];
+      var type=coals[0].type;
+      var ni=rt.CreateWorldInstance?rt.CreateWorldInstance(type,layer,px+80,py):
+               rt._CreateInstance?rt._CreateInstance(type,layer,px+80,py):null;
+      if(ni) bmosLog('Coal spawned!'); else bmosLog('Spawn API not found');
+    }catch(e){ bmosLog('Spawn failed: '+e.message); }
+    return;
+  }
+
+  if(cmd==='dupe_cobb'){
+    var insts=bmosGetInsts('cobb');
+    if(!insts.length) insts=bmosGetInsts('player');
+    if(!insts.length){ bmosLog('Cobb not found — use List Objs'); return; }
+    try{
+      var src=insts[0].inst;
+      var layout=rt._currentLayout||rt.layout;
+      var layer=layout._layers[0];
+      var type=insts[0].type;
+      var px=(src._x||src.x||100)+60;
+      var py=src._y||src.y||100;
+      var ni=rt.CreateWorldInstance?rt.CreateWorldInstance(type,layer,px,py):
+               rt._CreateInstance?rt._CreateInstance(type,layer,px,py):null;
+      if(ni) bmosLog('Cobb duped!'); else bmosLog('Create API not found — use List Objs for clues');
+    }catch(e){ bmosLog('Dupe failed: '+e.message); }
+    return;
+  }
+
+  if(cmd==='giant'||cmd==='tiny'||cmd==='reset_size'){
+    var insts=bmosGetInsts('cobb');
+    if(!insts.length) insts=bmosGetInsts('player');
+    if(!insts.length){ bmosLog('Cobb not found'); return; }
+    var scale=cmd==='giant'?3:cmd==='tiny'?0.35:1;
+    var changed=0;
+    insts.forEach(function(o){
+      var i=o.inst;
+      try{
+        if(i.SetSize){ var w=i._width||i.width||32,h=i._height||i.height||32; i.SetSize(w*scale,h*scale); changed++; }
+        else if(i._width!==undefined){ i._width=(i._origW||32)*scale; i._height=(i._origH||32)*scale; changed++; }
+      }catch(e){}
+    });
+    bmosLog(changed?'Size changed!':'SetSize not accessible');
+    return;
+  }
+
+  if(cmd==='tp_spawn'){
+    var insts=bmosGetInsts('cobb');
+    if(!insts.length) insts=bmosGetInsts('player');
+    if(!insts.length){ bmosLog('Cobb not found'); return; }
+    insts.forEach(function(o){
+      var i=o.inst;
+      try{ if(i.SetX){ i.SetX(100); i.SetY(100); } else { i._x=100; i._y=100; } }catch(e){}
+    });
+    bmosLog('Teleported to spawn area');
+    return;
+  }
+
+  if(cmd==='kill_all'){
+    // destroy all non-player/non-cobb instances
+    var all=bmosGetInsts();
+    var killed=0;
+    all.forEach(function(o){
+      var n=o.name;
+      if(n.includes('cobb')||n.includes('player')||n.includes('ui')||n.includes('hud')) return;
+      try{ if(o.inst.Destroy){ o.inst.Destroy(); killed++; } }catch(e){}
+    });
+    bmosLog('Destroyed '+killed+' objects');
+    return;
+  }
+}
+
+// ── Menu open/close ───────────────────────────────────────────────────────────
+function bmosOpen(){ document.getElementById('bmos-menu').classList.add('open'); }
+function bmosClose(){ document.getElementById('bmos-menu').classList.remove('open'); }
+document.addEventListener('keydown',function(e){
+  if(e.key==='m'||e.key==='M'){ var m=document.getElementById('bmos-menu'); m.classList.contains('open')?bmosClose():bmosOpen(); }
+  if(e.key==='Escape') bmosClose();
+});
+</script>
 </body>
 </html>
