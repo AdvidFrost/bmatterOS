@@ -219,8 +219,8 @@
         <div id="game-detail">
           <div class="detail-banner" id="detail-banner"></div>
           <div class="detail-meta">
-            <button class="detail-back-btn" onclick="closeDetail()">← Back</button>
-            <button class="detail-play-btn" id="detail-play-btn">▶ Play</button>
+            <button class="detail-back-btn" onclick="closeDetail()">&#8592; Back</button>
+            <button class="detail-play-btn" id="detail-play-btn">&#9654; Play</button>
             <div class="detail-title" id="detail-title"></div>
             <div class="detail-tag" id="detail-tag"></div>
           </div>
@@ -249,7 +249,7 @@
           </div>
         </div>
         <div class="support-form" id="support-form">
-          <button class="form-back" onclick="hideSupportForm()">← Back</button>
+          <button class="form-back" onclick="hideSupportForm()">&#8592; Back</button>
           <div id="form-title" style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:1rem;"></div>
           <div class="form-group">
             <label class="form-label">Your Name <span style="color:var(--text3);font-weight:400;">(optional)</span></label>
@@ -325,7 +325,7 @@
 <div id="game-overlay">
   <div class="overlay-bar">
     <div class="overlay-title" id="overlay-title">Game</div>
-    <button class="overlay-close" onclick="closeGame()">✕ Close</button>
+    <button class="overlay-close" onclick="closeGame()">&#10005; Close</button>
   </div>
   <div id="game-content" style="flex:1;overflow:hidden;"></div>
 </div>
@@ -557,13 +557,18 @@ function launchGame(game) {
   }
 
   const gameAbsUrl = new URL(game.url, window.location.href).href;
+  // Base dir of the game file so relative asset paths resolve correctly after injection
+  const gameDir = gameAbsUrl.substring(0, gameAbsUrl.lastIndexOf('/') + 1);
+
   const bootstrap =
     `<!doctype html><html><head><title>${game.name}</title>` +
     `<style>*{margin:0;padding:0;}html,body{width:100%;height:100%;overflow:hidden;background:#000;}</style></head>` +
     `<body><script>(async()=>{try{` +
     `const r=await fetch('${gameAbsUrl}?t='+Date.now(),{cache:'no-store'});` +
     `const h=await r.text();` +
-    `document.open();document.write(h);document.close();` +
+    `const base='<base href="${gameDir}">';` +
+    `const html=h.replace(/(<head[^>]*>)/i,'$1'+base);` +
+    `document.open();document.write(html===h?base+h:html);document.close();` +
     `}catch(e){document.body.innerHTML='<div style="color:#fff;padding:20px;font-family:sans-serif;">Failed to load: '+e.message+'</div>';}` +
     `})();<\/script></body></html>`;
 
