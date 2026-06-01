@@ -8,22 +8,24 @@
 	<!-- Made with Construct, the game and app creator :: https://www.construct.net -->
 	<meta name="generator" content="Scirra Construct">
 
-
-
-
 	<link rel="icon" type="image/png" href="icons/icon-512.png">
-
 	<link rel="stylesheet" href="style.css">
 
-
-
+	<!-- Polyfill: game was exported as Windows WebView2 wrapper; provide no-op stubs so it runs in a regular browser -->
+	<script>
+	if (!window.chrome) window.chrome = {};
+	if (!window.chrome.webview) {
+		window.chrome.webview = {
+			addEventListener: function() {},
+			removeEventListener: function() {},
+			postMessage: function() {}
+		};
+	}
+	</script>
 </head> 
  
 <body>
 
-	
-
-	
 	<noscript>
 		<div id="notSupportedWrap">
 			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
@@ -33,7 +35,6 @@
 	<script src="scripts/modernjscheck.js"></script>
 	<script src="scripts/supportcheck.js"></script>
 	<script src="scripts/main.js" type="module"></script>
-
 
 </body> 
 </html>
