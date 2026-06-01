@@ -11,16 +11,36 @@
 	<link rel="icon" type="image/png" href="icons/icon-512.png">
 	<link rel="stylesheet" href="style.css">
 
-	<!-- Polyfill: game was exported as Windows WebView2 wrapper; provide no-op stubs so it runs in a regular browser -->
+	<!-- Polyfill: game was exported as Windows WebView2 wrapper.
+	     Simulate the WebView2 host handshake so the runtime doesn't hang waiting for a response. -->
 	<script>
-	if (!window.chrome) window.chrome = {};
-	if (!window.chrome.webview) {
-		window.chrome.webview = {
-			addEventListener: function() {},
-			removeEventListener: function() {},
-			postMessage: function() {}
-		};
-	}
+	(function() {
+		if (!window.chrome) window.chrome = {};
+		if (!window.chrome.webview) {
+			var _listeners = {};
+			window.chrome.webview = {
+				addEventListener: function(type, fn) {
+					_listeners[type] = fn;
+				},
+				removeEventListener: function() {},
+				postMessage: function(dataStr) {
+					try {
+						var msg = JSON.parse(dataStr);
+						// When the runtime sends wrapper-init, reply with a fake wrapper-init-response
+						// so _InitWrapper()'s Promise resolves and the game continues loading
+						if (msg.type === 'wrapper-init' && _listeners['message']) {
+							setTimeout(function() {
+								_listeners['message']({
+									data: { type: 'wrapper-init-response', registeredComponentIds: [] },
+									additionalObjects: null
+								});
+							}, 0);
+						}
+					} catch(e) {}
+				}
+			};
+		}
+	})();
 	</script>
 </head> 
  
