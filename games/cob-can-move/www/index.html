@@ -60,12 +60,12 @@
   <div id="bmos-menu" onclick="if(event.target===this)bmosClose()">
     <div id="bmos-panel">
       <div class="ph">
-        <span class="pt">⚡ bmatterOS MODS</span>
-        <button class="px" onclick="bmosClose()">✕</button>
+        <span class="pt">&#x26A1; bmatterOS MODS</span>
+        <button class="px" onclick="bmosClose()">&#x2715;</button>
       </div>
       <div class="pb">
 
-        <div class="sl">Speed</div>
+        <div class="sl">Game Speed</div>
         <div class="br">
           <button class="bb" id="bs0" onclick="bmosSpeed(0.25,'bs0')">0.25x</button>
           <button class="bb" id="bs1" onclick="bmosSpeed(0.5,'bs1')">0.5x</button>
@@ -75,13 +75,22 @@
           <button class="bb" id="bs5" onclick="bmosSpeed(8,'bs5')">8x</button>
         </div>
 
+        <div class="sl">Player Speed Only</div>
+        <div class="br">
+          <button class="bb" id="bps0" onclick="bmosPlayerSpeed(0.5,'bps0')">0.5x</button>
+          <button class="bb on" id="bps1" onclick="bmosPlayerSpeed(1,'bps1')">1x</button>
+          <button class="bb" id="bps2" onclick="bmosPlayerSpeed(2,'bps2')">2x</button>
+          <button class="bb" id="bps3" onclick="bmosPlayerSpeed(4,'bps3')">4x</button>
+          <button class="bb" id="bps4" onclick="bmosPlayerSpeed(8,'bps4')">8x</button>
+        </div>
+
         <hr class="div">
         <div class="sl">Playback</div>
         <div class="br">
-          <button class="bb" id="bpause" onclick="bmosPause()">⏸ Pause</button>
-          <button class="bb" onclick="bmosStep()">⏭ Step</button>
-          <button class="bb" onclick="bmosFullscreen()">⛶ Fullscreen</button>
-          <button class="bb" onclick="bmosScreenshot()">📷 Shot</button>
+          <button class="bb" id="bpause" onclick="bmosPause()">&#x23F8; Pause</button>
+          <button class="bb" onclick="bmosStep()">&#x23ED; Step</button>
+          <button class="bb" onclick="bmosFullscreen()">&#x26F6; Fullscreen</button>
+          <button class="bb" onclick="bmosScreenshot()">&#x1F4F7; Shot</button>
         </div>
 
         <hr class="div">
@@ -98,51 +107,51 @@
         <hr class="div">
         <div class="sl">Zoom</div>
         <div class="br">
-          <button class="bb" onclick="bmosZoom(.8)">－ Out</button>
-          <button class="bb" onclick="bmosZoom(1/0.8)">＋ In</button>
-          <button class="bb" onclick="bmosZoomReset()">↺ Reset</button>
+          <button class="bb" onclick="bmosZoom(.8)">&#xFF0D; Out</button>
+          <button class="bb" onclick="bmosZoom(1/0.8)">&#xFF0B; In</button>
+          <button class="bb" onclick="bmosZoomReset()">&#x21BA; Reset</button>
         </div>
 
         <hr class="div">
         <div class="sl">Player hacks</div>
         <div class="br">
-          <button class="bb" id="bgod" onclick="bmosToggleGod()">❤ God Mode</button>
-          <button class="bb" onclick="bmosHack('fill_hunger')">🍖 Fill Hunger</button>
-          <button class="bb" onclick="bmosHack('fill_warmth')">🔥 Fill Warmth</button>
+          <button class="bb" id="bgod" onclick="bmosToggleGod()">&#x2764; God Mode</button>
+          <button class="bb" onclick="bmosHack('fill_hunger')">&#x1F356; Fill Hunger</button>
+          <button class="bb" onclick="bmosHack('fill_warmth')">&#x1F525; Fill Warmth</button>
         </div>
         <div class="br">
-          <button class="bb" onclick="bmosHack('giant')">🔼 Giant</button>
-          <button class="bb" onclick="bmosHack('tiny')">🔽 Tiny</button>
-          <button class="bb" onclick="bmosHack('norm_size')">↺ Norm</button>
-          <button class="bb" onclick="bmosHack('show_pos')">📍 Position</button>
+          <button class="bb" onclick="bmosHack('giant')">&#x1F53C; Giant</button>
+          <button class="bb" onclick="bmosHack('tiny')">&#x1F53D; Tiny</button>
+          <button class="bb" onclick="bmosHack('norm_size')">&#x21BA; Norm</button>
+          <button class="bb" onclick="bmosHack('show_pos')">&#x1F4CD; Position</button>
         </div>
         <div class="br">
-          <button class="bb" onclick="bmosHack('tp_000')">⬆ To (0,0)</button>
-          <button class="bb" onclick="bmosHack('noclip_info')">ℹ Noclip?</button>
+          <button class="bb" onclick="bmosHack('tp_000')">&#x2B06; To (0,0)</button>
+          <button class="bb" onclick="bmosHack('noclip_info')">&#x2139; Noclip?</button>
         </div>
 
         <hr class="div">
         <div class="sl">Cobb / monsters</div>
         <div class="br">
-          <button class="bb" onclick="bmosHack('kill_cobb')">💀 Kill All Cobb</button>
-          <button class="bb" onclick="bmosHack('freeze_cobb')">🧊 Freeze Cobb</button>
+          <button class="bb" onclick="bmosHack('kill_cobb')">&#x1F480; Kill All Cobb</button>
+          <button class="bb" onclick="bmosHack('freeze_cobb')">&#x1F9CA; Freeze Cobb</button>
         </div>
         <div class="br">
-          <button class="bb" onclick="bmosHack('giant_cobb')">🔼 Giant Cobb</button>
-          <button class="bb" onclick="bmosHack('tiny_cobb')">🔽 Tiny Cobb</button>
+          <button class="bb" onclick="bmosHack('giant_cobb')">&#x1F53C; Giant Cobb</button>
+          <button class="bb" onclick="bmosHack('tiny_cobb')">&#x1F53D; Tiny Cobb</button>
         </div>
 
         <hr class="div">
         <div class="sl">World</div>
         <div class="br">
-          <button class="bb" onclick="bmosHack('spawn_grabbable')">📦 Spawn Item</button>
-          <button class="bb" onclick="bmosHack('spawn_seed')">🌱 Spawn Seed</button>
-          <button class="bb" onclick="bmosHack('kill_env')">🗑 Clear Env</button>
+          <button class="bb" onclick="bmosHack('spawn_grabbable')">&#x1F4E6; Spawn Item</button>
+          <button class="bb" onclick="bmosHack('spawn_seed')">&#x1F331; Spawn Seed</button>
+          <button class="bb" onclick="bmosHack('kill_env')">&#x1F5D1; Clear Env</button>
         </div>
         <div class="br">
-          <button class="bb" onclick="bmosHack('conveyor_fast')">⏩ Fast Conveyors</button>
-          <button class="bb" onclick="bmosHack('conveyor_rev')">⏪ Rev Conveyors</button>
-          <button class="bb" onclick="bmosHack('conveyor_stop')">⏹ Stop Conveyors</button>
+          <button class="bb" onclick="bmosHack('conveyor_fast')">&#x23E9; Fast Conveyors</button>
+          <button class="bb" onclick="bmosHack('conveyor_rev')">&#x23EA; Rev Conveyors</button>
+          <button class="bb" onclick="bmosHack('conveyor_stop')">&#x23F9; Stop Conveyors</button>
         </div>
 
         <div id="bmos-log"></div>
@@ -151,7 +160,7 @@
   </div>
 
 <script>
-// ── Speed: timestamp scaling ──────────────────────────────────────────────────
+// ── Game Speed: timestamp scaling (affects entire game) ───────────────────────
 var _spd=1,_vt=null,_lr=null,_paused=false,_stepOnce=false;
 var _oRAF=window.requestAnimationFrame.bind(window);
 window.requestAnimationFrame=function(cb){
@@ -171,10 +180,52 @@ function bmosSpeed(s,id){
 function bmosPause(){
   _paused=!_paused;
   var b=document.getElementById('bpause');
-  b.textContent=_paused?'▶ Resume':'⏸ Pause';
+  b.textContent=_paused?'&#x25B6; Resume':'&#x23F8; Pause';
   b.classList.toggle('on',_paused);
 }
 function bmosStep(){_stepOnce=true;}
+
+// ── Player Speed: modifies Platform behavior properties only ──────────────────
+// Stores originals on first call so 1x always restores correctly.
+var _platOrig=null; // {maxSpeed, accel, decel, jumpStrength}
+function bmosFindPlatBehavior(playerInst){
+  if(!playerInst._behaviors) return null;
+  var behaviors=playerInst._behaviors;
+  var keys=Object.keys(behaviors);
+  for(var i=0;i<keys.length;i++){
+    var b=behaviors[keys[i]];
+    // Platform behavior has _maxSpeed (walk speed ceiling)
+    if(b&&b._maxSpeed!==undefined) return b;
+  }
+  return null;
+}
+function bmosPlayerSpeed(mult,id){
+  if(!bmosRT()){bmosLog('Get into the game first');return;}
+  var pl=bmosPlayer();
+  if(!pl.length){bmosLog('player not found');return;}
+  var plat=bmosFindPlatBehavior(pl[0].i);
+  if(!plat){
+    bmosLog('Platform behavior not found — use Game Speed instead');
+    return;
+  }
+  // snapshot originals once
+  if(!_platOrig){
+    _platOrig={
+      maxSpeed:plat._maxSpeed,
+      accel:plat._accel!==undefined?plat._accel:null,
+      decel:plat._decel!==undefined?plat._decel:null,
+      jumpStrength:plat._jumpStrength!==undefined?plat._jumpStrength:null
+    };
+  }
+  plat._maxSpeed=_platOrig.maxSpeed*mult;
+  if(_platOrig.accel!==null) plat._accel=_platOrig.accel*mult;
+  if(_platOrig.decel!==null) plat._decel=_platOrig.decel*mult;
+  // jump height scales with sqrt so it feels proportional at higher speeds
+  if(_platOrig.jumpStrength!==null) plat._jumpStrength=_platOrig.jumpStrength*Math.sqrt(mult);
+  document.querySelectorAll('[id^="bps"]').forEach(function(b){b.classList.remove('on');});
+  document.getElementById(id).classList.add('on');
+  bmosLog('Player speed x'+mult+' (maxSpd='+(plat._maxSpeed|0)+')');
+}
 
 // ── Filters ───────────────────────────────────────────────────────────────────
 var _fx='',_zoom=1;
@@ -210,7 +261,6 @@ function bmosRT(){
   var ri=window.c3_runtimeInterface;
   return ri&&(ri._localRuntime||ri.localRuntime||ri._runtime||ri.runtime)||null;
 }
-// now using _allObjectClasses — confirmed by Deep Search
 function bmosTypes(){
   var rt=bmosRT();
   return rt&&(rt._allObjectClasses||rt._objectTypes||rt._objectTypesByName)||null;
@@ -230,7 +280,7 @@ function bmosInsts(nameHint){
 }
 function bmosLog(msg){document.getElementById('bmos-log').textContent='> '+msg;}
 
-// ── God mode loop — max out hunger/warmth bars every 500ms ───────────────────
+// ── God mode loop ─────────────────────────────────────────────────────────────
 var _god=false,_godTimer=null;
 function bmosToggleGod(){
   _god=!_god;
@@ -242,22 +292,19 @@ function bmosToggleGod(){
       bmosMaxBar('playerHungerBar');
       bmosMaxBar('playerFreezeBar');
     },500);
-    bmosLog('God mode ON — hunger+warmth maxed');
+    bmosLog('God mode ON');
   } else {
     clearInterval(_godTimer);
     bmosLog('God mode OFF');
   }
 }
 function bmosMaxBar(name){
-  // bars are likely sprites whose scaleX or width represents the value
-  // try setting width to original width, and also try any _value/_cur properties
   bmosInsts(name).forEach(function(o){
     var i=o.i;
     try{
       if(i._originalWidth===undefined)i._originalWidth=i._width||i.width||100;
       if(typeof i.SetWidth==='function') i.SetWidth(i._originalWidth);
       else if(i._width!==undefined) i._width=i._originalWidth;
-      // also try direct value properties
       if(i._value!==undefined)i._value=1;
       if(i._cur!==undefined)i._cur=i._max||100;
     }catch(e){}
@@ -295,7 +342,6 @@ function bmosResize(insts,scale){
 function bmosHack(cmd){
   if(!bmosRT()){bmosLog('Runtime not ready — get into the game first');return;}
 
-  // ── Player hacks ──
   if(cmd==='fill_hunger'){ bmosMaxBar('playerHungerBar'); bmosLog('Hunger filled'); return; }
   if(cmd==='fill_warmth'){ bmosMaxBar('playerFreezeBar'); bmosLog('Warmth filled'); return; }
 
@@ -308,7 +354,7 @@ function bmosHack(cmd){
     bmosLog(n?'Player shrunk':'player instances not found'); return;
   }
   if(cmd==='norm_size'){
-    var n=bmosResize(bmosPlayer(),-1);// -1 = reset to origW/origH
+    var n=bmosResize(bmosPlayer(),-1);
     bmosLog(n?'Size reset':'player instances not found'); return;
   }
 
@@ -327,16 +373,19 @@ function bmosHack(cmd){
   }
 
   if(cmd==='noclip_info'){
-    bmosLog('Noclip needs Platform behavior access — checking...');
     var pl=bmosPlayer();
     if(!pl.length){bmosLog('player not found');return;}
     var i=pl[0].i;
-    var bkeys=i._behaviors?Object.keys(i._behaviors):[];
-    bmosLog(bkeys.length?'Behaviors: '+bkeys.join(', '):'No _behaviors found on player');
+    var plat=bmosFindPlatBehavior(i);
+    if(plat){
+      bmosLog('Platform found! maxSpd='+(plat._maxSpeed|0)+' accel='+(plat._accel|0)+' jump='+(plat._jumpStrength|0));
+    } else {
+      var bkeys=i._behaviors?Object.keys(i._behaviors):[];
+      bmosLog(bkeys.length?'Behaviors: '+bkeys.join(', '):'No _behaviors on player');
+    }
     return;
   }
 
-  // ── Cobb / monster hacks ──
   if(cmd==='kill_cobb'){
     var targets=bmosInsts('flesh').concat(bmosInsts('monsterProp'));
     var k=0;
@@ -372,7 +421,6 @@ function bmosHack(cmd){
     bmosLog(n?'Cobb is tiny':'flesh/monsterProp not found'); return;
   }
 
-  // ── World hacks ──
   if(cmd==='spawn_grabbable'||cmd==='spawn_seed'){
     var typeName=cmd==='spawn_seed'?'seed':'grabbable';
     var src=bmosInsts(typeName);
@@ -397,9 +445,7 @@ function bmosHack(cmd){
     var envNames=['envChunk','envGrass','envPlant','envBush','envCarpet','deadProps','flesh'];
     var k=0;
     envNames.forEach(function(name){
-      var arr=bmosInsts(name);
-      // slice to avoid mutation during iteration
-      arr.slice().forEach(function(o){
+      bmosInsts(name).slice().forEach(function(o){
         try{if(typeof o.i.Destroy==='function'){o.i.Destroy();k++;}}catch(e){}
       });
     });
@@ -412,7 +458,6 @@ function bmosHack(cmd){
     convs.forEach(function(o){
       var i=o.i;
       try{
-        // Construct conveyor belt behavior typically stores speed in _speed or via behavior
         var spd=cmd==='conveyor_stop'?0:cmd==='conveyor_fast'?600:-300;
         if(i._behaviors){
           Object.values(i._behaviors).forEach(function(b){
