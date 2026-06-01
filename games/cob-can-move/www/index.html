@@ -29,10 +29,10 @@
     .bb:hover{border-color:#555;color:#ccc;}
     .bb.on{border-color:#e53e3e;color:#e53e3e;background:rgba(229,62,62,.08);}
     hr.div{border:none;border-top:1px solid #1a1a1a;margin:8px 0;}
-    #bmos-log{font-size:10px;color:#e53e3e;min-height:16px;margin-top:5px;word-break:break-all;}
-    #bmos-dump{font-size:10px;color:#555;margin-top:4px;line-height:1.6;max-height:120px;overflow-y:auto;word-break:break-all;white-space:pre-wrap;}
+    #bmos-log{font-size:10px;color:#e53e3e;min-height:14px;margin-top:5px;word-break:break-all;}
   </style>
 
+  <!-- WebView2 polyfill -->
   <script>
   (function(){
     if(!window.chrome)window.chrome={};
@@ -55,7 +55,7 @@
   <script src="scripts/supportcheck.js"></script>
   <script src="scripts/main.js" type="module"></script>
 
-  <div id="bmos-badge" onclick="bmosOpen()"><span class="bd"></span>bmOS</div>
+  <div id="bmos-badge" onclick="bmosOpen()"><span class="bd"></span>bmOS [M]</div>
 
   <div id="bmos-menu" onclick="if(event.target===this)bmosClose()">
     <div id="bmos-panel">
@@ -65,7 +65,7 @@
       </div>
       <div class="pb">
 
-        <div class="sl">Speed (global clock — zero lag)</div>
+        <div class="sl">Speed</div>
         <div class="br">
           <button class="bb" id="bs0" onclick="bmosSpeed(0.25,'bs0')">0.25x</button>
           <button class="bb" id="bs1" onclick="bmosSpeed(0.5,'bs1')">0.5x</button>
@@ -104,47 +104,55 @@
         </div>
 
         <hr class="div">
-        <div class="sl">Debug — run these first, tell me the output</div>
+        <div class="sl">Player hacks</div>
         <div class="br">
-          <button class="bb" onclick="bmosRTStatus()">🔍 RT Status</button>
-          <button class="bb" onclick="bmosListObjs()">📋 List Objs</button>
-          <button class="bb" onclick="bmosListVars()">📊 List Vars</button>
-        </div>
-        <div class="br">
-          <button class="bb" onclick="bmosDeepSearch()">🔎 Deep Search</button>
-          <button class="bb" onclick="bmosClearLog()">🗑 Clear</button>
-        </div>
-        <div id="bmos-log"></div>
-        <div id="bmos-dump"></div>
-
-        <hr class="div">
-        <div class="sl">Game Hacks (set player name below first)</div>
-        <div class="br" style="margin-bottom:6px">
-          <input id="bmos-pname" placeholder="player obj name..." style="flex:1;background:#141414;border:1px solid #333;border-radius:4px;color:#ccc;font:11px 'Courier New',monospace;padding:5px 6px;outline:none;">
-          <button class="bb" style="flex:0 0 50px" onclick="bmosSetPlayer()">Set</button>
+          <button class="bb" id="bgod" onclick="bmosToggleGod()">❤ God Mode</button>
+          <button class="bb" onclick="bmosHack('fill_hunger')">🍖 Fill Hunger</button>
+          <button class="bb" onclick="bmosHack('fill_warmth')">🔥 Fill Warmth</button>
         </div>
         <div class="br">
           <button class="bb" onclick="bmosHack('giant')">🔼 Giant</button>
           <button class="bb" onclick="bmosHack('tiny')">🔽 Tiny</button>
-          <button class="bb" onclick="bmosHack('norm')">↺ Size</button>
-          <button class="bb" onclick="bmosHack('tp')">⬆ Spawn</button>
+          <button class="bb" onclick="bmosHack('norm_size')">↺ Norm</button>
+          <button class="bb" onclick="bmosHack('show_pos')">📍 Position</button>
         </div>
         <div class="br">
-          <button class="bb" onclick="bmosHack('kill_non_player')">💀 Kill Others</button>
-          <button class="bb" onclick="bmosHack('freeze_non_player')">🧊 Freeze Others</button>
-        </div>
-        <div class="br">
-          <button class="bb" onclick="bmosHack('spawn_copy')">👥 Spawn Copy</button>
-          <button class="bb" onclick="bmosHack('show_pos')">📍 Show Pos</button>
+          <button class="bb" onclick="bmosHack('tp_000')">⬆ To (0,0)</button>
+          <button class="bb" onclick="bmosHack('noclip_info')">ℹ Noclip?</button>
         </div>
 
+        <hr class="div">
+        <div class="sl">Cobb / monsters</div>
+        <div class="br">
+          <button class="bb" onclick="bmosHack('kill_cobb')">💀 Kill All Cobb</button>
+          <button class="bb" onclick="bmosHack('freeze_cobb')">🧊 Freeze Cobb</button>
+        </div>
+        <div class="br">
+          <button class="bb" onclick="bmosHack('giant_cobb')">🔼 Giant Cobb</button>
+          <button class="bb" onclick="bmosHack('tiny_cobb')">🔽 Tiny Cobb</button>
+        </div>
+
+        <hr class="div">
+        <div class="sl">World</div>
+        <div class="br">
+          <button class="bb" onclick="bmosHack('spawn_grabbable')">📦 Spawn Item</button>
+          <button class="bb" onclick="bmosHack('spawn_seed')">🌱 Spawn Seed</button>
+          <button class="bb" onclick="bmosHack('kill_env')">🗑 Clear Env</button>
+        </div>
+        <div class="br">
+          <button class="bb" onclick="bmosHack('conveyor_fast')">⏩ Fast Conveyors</button>
+          <button class="bb" onclick="bmosHack('conveyor_rev')">⏪ Rev Conveyors</button>
+          <button class="bb" onclick="bmosHack('conveyor_stop')">⏹ Stop Conveyors</button>
+        </div>
+
+        <div id="bmos-log"></div>
       </div>
     </div>
   </div>
 
 <script>
-// ── Speed: timestamp scaling (one RAF per frame, zero extra engine ticks) ─────
-var _spd=1, _vt=null, _lr=null, _paused=false, _stepOnce=false;
+// ── Speed: timestamp scaling ──────────────────────────────────────────────────
+var _spd=1,_vt=null,_lr=null,_paused=false,_stepOnce=false;
 var _oRAF=window.requestAnimationFrame.bind(window);
 window.requestAnimationFrame=function(cb){
   return _oRAF(function(real){
@@ -152,11 +160,9 @@ window.requestAnimationFrame=function(cb){
     _stepOnce=false;
     if(_spd===1){_vt=null;_lr=null;cb(real);return;}
     if(_vt===null){_vt=real;_lr=real;}
-    var d=real-_lr;_lr=real;_vt+=d*_spd;
-    cb(_vt);
+    var d=real-_lr;_lr=real;_vt+=d*_spd;cb(_vt);
   });
 };
-
 function bmosSpeed(s,id){
   _spd=s;_vt=null;_lr=null;
   document.querySelectorAll('[id^="bs"]').forEach(function(b){b.classList.remove('on');});
@@ -194,244 +200,230 @@ function bmosFullscreen(){
 }
 function bmosScreenshot(){
   var c=document.querySelector('canvas');
-  if(!c){bmosLog('No canvas found');return;}
+  if(!c){bmosLog('No canvas');return;}
   try{var a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='cobb-'+Date.now()+'.png';a.click();}
   catch(e){bmosLog('Shot failed: '+e.message);}
 }
 
-// ── Runtime detection — tries every known C3 property path ───────────────────
+// ── Runtime ───────────────────────────────────────────────────────────────────
 function bmosRT(){
   var ri=window.c3_runtimeInterface;
-  if(!ri) return null;
-  // try every known path for the local runtime object
-  return ri._localRuntime || ri.localRuntime || ri._runtime || ri.runtime || null;
+  return ri&&(ri._localRuntime||ri.localRuntime||ri._runtime||ri.runtime)||null;
 }
-
-function bmosGetTypes(){
-  var rt=bmosRT(); if(!rt) return null;
-  // try every known path for the object type map
-  return rt._objectTypes || rt._objectTypesByName || rt.objectTypes ||
-         rt._objectTypeMap || rt._worldManager&&rt._worldManager._objectTypes || null;
-}
-
-// ── Debug helpers ─────────────────────────────────────────────────────────────
-function bmosLog(msg){document.getElementById('bmos-log').textContent='> '+msg;}
-function bmosDump(txt){document.getElementById('bmos-dump').textContent=txt;}
-function bmosClearLog(){bmosLog('');bmosDump('');}
-
-function bmosRTStatus(){
-  var ri=window.c3_runtimeInterface;
-  if(!ri){bmosLog('c3_runtimeInterface not found yet — wait for game to fully load');return;}
-  // list top-level keys on the runtimeInterface
-  var keys=Object.getOwnPropertyNames(ri).filter(function(k){return k.startsWith('_');}).slice(0,40);
+// now using _allObjectClasses — confirmed by Deep Search
+function bmosTypes(){
   var rt=bmosRT();
-  bmosLog(rt?'Runtime found! ✓ See keys below':'_localRuntime is null — still loading?');
-  bmosDump('ri keys: '+keys.join(', '));
+  return rt&&(rt._allObjectClasses||rt._objectTypes||rt._objectTypesByName)||null;
 }
-
-function bmosListObjs(){
-  var rt=bmosRT();
-  if(!rt){
-    // try harder — dump all underscore keys on runtimeInterface so we can find the right path
-    var ri=window.c3_runtimeInterface;
-    if(!ri){bmosLog('c3_runtimeInterface missing — game still loading');return;}
-    var keys=Object.getOwnPropertyNames(ri).filter(function(k){return k.startsWith('_')&&ri[k]&&typeof ri[k]==='object';});
-    bmosLog('_localRuntime null — inspecting ri sub-objects...');
-    bmosDump(keys.join('\n'));
-    return;
-  }
-  var types=bmosGetTypes();
-  if(!types){
-    // dump rt keys so we can find the right property
-    var rk=Object.getOwnPropertyNames(rt).filter(function(k){return k.startsWith('_');}).slice(0,50);
-    bmosLog('Object types map not found — dumping rt keys');
-    bmosDump(rk.join(', '));
-    return;
-  }
-  var names=[];
-  types.forEach(function(t){names.push(t._name||t.name||'?');});
-  bmosLog('Found '+names.length+' types (tell me these names!)');
-  bmosDump(names.join('\n'));
-}
-
-function bmosListVars(){
-  var rt=bmosRT();
-  if(!rt){bmosLog('Runtime not ready');return;}
-  // try to find global variables
-  var vars=rt._globalVars||rt._globalVariables||rt.globalVars||null;
-  if(!vars){bmosLog('No global vars found');bmosDump('');return;}
-  var out=[];
-  if(Array.isArray(vars)){
-    vars.forEach(function(v){out.push((v._name||v.name||'?')+' = '+(v._value!==undefined?v._value:v.value));});
-  } else if(vars.forEach){
-    vars.forEach(function(v,k){out.push(k+' = '+(v._value!==undefined?v._value:v));});
-  }
-  bmosLog('Global vars ('+out.length+'):');
-  bmosDump(out.join('\n')||'(empty)');
-}
-
-function bmosDeepSearch(){
-  // walk c3_runtimeInterface looking for anything with a forEach that returns objects with _name
-  var ri=window.c3_runtimeInterface;
-  if(!ri){bmosLog('c3_runtimeInterface missing');return;}
-  var found=[];
-  function tryMap(obj,path,depth){
-    if(depth>3||!obj||typeof obj!=='object') return;
-    try{
-      if(typeof obj.forEach==='function'){
-        var count=0;
-        obj.forEach(function(v){
-          if(v&&(v._name||v.name)) found.push(path+': '+(v._name||v.name));
-          count++;
-          if(count>100) return;
-        });
-        if(count>0&&found.length===0) found.push(path+': '+count+' entries (no _name)');
-      }
-    }catch(e){}
-    if(depth<2){
-      Object.getOwnPropertyNames(obj).forEach(function(k){
-        if(k.startsWith('_')&&obj[k]&&typeof obj[k]==='object'){
-          try{tryMap(obj[k],path+'.'+k,depth+1);}catch(e){}
-        }
-      });
-    }
-  }
-  tryMap(ri,'ri',0);
-  bmosLog(found.length?'Deep search results:':'Nothing found with _name — try RT Status first');
-  bmosDump(found.slice(0,60).join('\n'));
-}
-
-// ── Player name ───────────────────────────────────────────────────────────────
-var _playerName='';
-function bmosSetPlayer(){
-  _playerName=document.getElementById('bmos-pname').value.trim();
-  bmosLog(_playerName?'Player set to: '+_playerName:'Cleared player name');
-}
-
-function bmosGetPlayerInsts(){
-  var types=bmosGetTypes(); if(!types) return [];
+function bmosInsts(nameHint){
+  var types=bmosTypes(); if(!types) return [];
+  var hint=nameHint?nameHint.toLowerCase():null;
   var out=[];
   types.forEach(function(t){
     var n=(t._name||t.name||'').toLowerCase();
-    var search=_playerName?_playerName.toLowerCase():null;
-    if(!search||n===search||n.includes(search)){
+    if(!hint||n===hint||n.includes(hint)){
       var arr=t._instances||t.instances||[];
-      arr.forEach(function(i){out.push({type:t,inst:i,name:t._name||t.name});});
+      arr.forEach(function(i){out.push({t:t,i:i,n:t._name||t.name||'?'});});
     }
   });
   return out;
 }
+function bmosLog(msg){document.getElementById('bmos-log').textContent='> '+msg;}
+
+// ── God mode loop — max out hunger/warmth bars every 500ms ───────────────────
+var _god=false,_godTimer=null;
+function bmosToggleGod(){
+  _god=!_god;
+  var b=document.getElementById('bgod');
+  b.classList.toggle('on',_god);
+  b.textContent=_god?'❤ God ON':'❤ God Mode';
+  if(_god){
+    _godTimer=setInterval(function(){
+      bmosMaxBar('playerHungerBar');
+      bmosMaxBar('playerFreezeBar');
+    },500);
+    bmosLog('God mode ON — hunger+warmth maxed');
+  } else {
+    clearInterval(_godTimer);
+    bmosLog('God mode OFF');
+  }
+}
+function bmosMaxBar(name){
+  // bars are likely sprites whose scaleX or width represents the value
+  // try setting width to original width, and also try any _value/_cur properties
+  bmosInsts(name).forEach(function(o){
+    var i=o.i;
+    try{
+      if(i._originalWidth===undefined)i._originalWidth=i._width||i.width||100;
+      if(typeof i.SetWidth==='function') i.SetWidth(i._originalWidth);
+      else if(i._width!==undefined) i._width=i._originalWidth;
+      // also try direct value properties
+      if(i._value!==undefined)i._value=1;
+      if(i._cur!==undefined)i._cur=i._max||100;
+    }catch(e){}
+  });
+}
+
+// ── Player helpers ────────────────────────────────────────────────────────────
+function bmosPlayer(){ return bmosInsts('player').filter(function(o){return o.n==='player';}); }
+function bmosGetXY(i){
+  return {
+    x:typeof i.GetX==='function'?i.GetX():(i._x||0),
+    y:typeof i.GetY==='function'?i.GetY():(i._y||0)
+  };
+}
+function bmosSetXY(i,x,y){
+  try{if(typeof i.SetX==='function'){i.SetX(x);i.SetY(y);}else{i._x=x;i._y=y;}}catch(e){}
+}
+
+// ── Resize helper ─────────────────────────────────────────────────────────────
+function bmosResize(insts,scale){
+  var done=0;
+  insts.forEach(function(o){
+    var i=o.i;
+    try{
+      if(!i._origW){i._origW=i._width||i.width||32;i._origH=i._height||i.height||32;}
+      var w=i._origW*(scale<0?1:scale), h=i._origH*(scale<0?1:scale);
+      if(typeof i.SetSize==='function'){i.SetSize(w,h);done++;}
+      else if(i._width!==undefined){i._width=w;i._height=h;done++;}
+    }catch(e){}
+  });
+  return done;
+}
 
 // ── Hacks ─────────────────────────────────────────────────────────────────────
 function bmosHack(cmd){
-  var rt=bmosRT();
-  if(!rt){bmosLog('Runtime not ready — fully load the game first');return;}
+  if(!bmosRT()){bmosLog('Runtime not ready — get into the game first');return;}
 
-  var insts=bmosGetPlayerInsts();
+  // ── Player hacks ──
+  if(cmd==='fill_hunger'){ bmosMaxBar('playerHungerBar'); bmosLog('Hunger filled'); return; }
+  if(cmd==='fill_warmth'){ bmosMaxBar('playerFreezeBar'); bmosLog('Warmth filled'); return; }
 
-  if(cmd==='giant'||cmd==='tiny'||cmd==='norm'){
-    if(!insts.length){bmosLog('No object found — set player name above, or use List Objs');return;}
-    var scale=cmd==='giant'?3.5:cmd==='tiny'?0.3:1;
-    var changed=0;
-    insts.forEach(function(o){
-      var i=o.inst;
-      try{
-        var ow=i._originalWidth||i._width||i.width||32;
-        var oh=i._originalHeight||i._height||i.height||32;
-        if(!i._originalWidth&&cmd!=='norm'){i._originalWidth=ow;i._originalHeight=oh;}
-        var tw=(i._originalWidth||ow)*scale, th=(i._originalHeight||oh)*scale;
-        if(typeof i.SetSize==='function'){i.SetSize(tw,th);changed++;}
-        else if(i._width!==undefined){i._width=tw;i._height=th;changed++;}
-      }catch(e){bmosLog('Size err: '+e.message);}
-    });
-    bmosLog(changed?'Size applied to '+changed+' instance(s)':'SetSize not accessible on this object');
-    return;
+  if(cmd==='giant'){
+    var n=bmosResize(bmosPlayer(),3.5);
+    bmosLog(n?'Player enlarged':'player instances not found'); return;
   }
-
-  if(cmd==='tp'){
-    if(!insts.length){bmosLog('No object found — set player name first');return;}
-    insts.forEach(function(o){
-      var i=o.inst;
-      try{
-        if(typeof i.SetX==='function'){i.SetX(100);i.SetY(100);}
-        else{i._x=100;i._y=100;}
-      }catch(e){}
-    });
-    bmosLog('Teleported '+insts.length+' instance(s) to (100,100)');
-    return;
+  if(cmd==='tiny'){
+    var n=bmosResize(bmosPlayer(),0.3);
+    bmosLog(n?'Player shrunk':'player instances not found'); return;
+  }
+  if(cmd==='norm_size'){
+    var n=bmosResize(bmosPlayer(),-1);// -1 = reset to origW/origH
+    bmosLog(n?'Size reset':'player instances not found'); return;
   }
 
   if(cmd==='show_pos'){
-    if(!insts.length){bmosLog('No object found — set player name first');return;}
-    var pos=insts.map(function(o){
-      var i=o.inst;
-      var x=typeof i.GetX==='function'?i.GetX():(i._x||0);
-      var y=typeof i.GetY==='function'?i.GetY():(i._y||0);
-      return o.name+': ('+Math.round(x)+', '+Math.round(y)+')';
-    });
-    bmosLog('Positions:');
-    bmosDump(pos.join('\n'));
+    var pl=bmosPlayer();
+    if(!pl.length){bmosLog('player not found');return;}
+    var p=bmosGetXY(pl[0].i);
+    bmosLog('Player: ('+Math.round(p.x)+', '+Math.round(p.y)+')'); return;
+  }
+
+  if(cmd==='tp_000'){
+    var pl=bmosPlayer();
+    if(!pl.length){bmosLog('player not found');return;}
+    pl.forEach(function(o){bmosSetXY(o.i,0,0);});
+    bmosLog('Teleported to (0,0)'); return;
+  }
+
+  if(cmd==='noclip_info'){
+    bmosLog('Noclip needs Platform behavior access — checking...');
+    var pl=bmosPlayer();
+    if(!pl.length){bmosLog('player not found');return;}
+    var i=pl[0].i;
+    var bkeys=i._behaviors?Object.keys(i._behaviors):[];
+    bmosLog(bkeys.length?'Behaviors: '+bkeys.join(', '):'No _behaviors found on player');
     return;
   }
 
-  if(cmd==='spawn_copy'){
-    if(!insts.length){bmosLog('No object — set player name first');return;}
+  // ── Cobb / monster hacks ──
+  if(cmd==='kill_cobb'){
+    var targets=bmosInsts('flesh').concat(bmosInsts('monsterProp'));
+    var k=0;
+    targets.forEach(function(o){try{if(typeof o.i.Destroy==='function'){o.i.Destroy();k++;}}catch(e){}});
+    bmosLog(k?'Destroyed '+k+' Cobb instance(s)':'No flesh/monsterProp instances found'); return;
+  }
+
+  if(cmd==='freeze_cobb'){
+    var targets=bmosInsts('flesh').concat(bmosInsts('monsterProp'));
+    var f=0;
+    targets.forEach(function(o){
+      var i=o.i;
+      try{
+        if(i._behaviors){
+          Object.values(i._behaviors).forEach(function(b){
+            ['_dx','_dy','_vx','_vy','_speed','_platformVx','_platformVy'].forEach(function(k){
+              if(b[k]!==undefined){b[k]=0;f++;}
+            });
+          });
+        }
+        ['_vx','_vy','_dx','_dy','_speed'].forEach(function(k){if(i[k]!==undefined){i[k]=0;f++;}});
+      }catch(e){}
+    });
+    bmosLog(f?'Froze Cobb ('+f+' velocity props zeroed)':'Velocity props not found — try 0.25x speed instead'); return;
+  }
+
+  if(cmd==='giant_cobb'){
+    var n=bmosResize(bmosInsts('flesh').concat(bmosInsts('monsterProp')),4);
+    bmosLog(n?'Cobb is now enormous':'flesh/monsterProp not found'); return;
+  }
+  if(cmd==='tiny_cobb'){
+    var n=bmosResize(bmosInsts('flesh').concat(bmosInsts('monsterProp')),0.2);
+    bmosLog(n?'Cobb is tiny':'flesh/monsterProp not found'); return;
+  }
+
+  // ── World hacks ──
+  if(cmd==='spawn_grabbable'||cmd==='spawn_seed'){
+    var typeName=cmd==='spawn_seed'?'seed':'grabbable';
+    var src=bmosInsts(typeName);
+    if(!src.length){bmosLog(typeName+' instances not currently loaded');return;}
+    var pl=bmosPlayer();
+    var px=200,py=200;
+    if(pl.length){var p=bmosGetXY(pl[0].i);px=p.x+80;py=p.y;}
+    var rt=bmosRT();
+    var type=src[0].t;
     try{
-      var src=insts[0].inst;
-      var type=insts[0].type;
-      var layout=rt._currentLayout||rt.layout||rt._layoutManager&&rt._layoutManager._currentLayout;
-      var layer=layout._layers[0];
-      var px=(typeof src.GetX==='function'?src.GetX():src._x||100)+80;
-      var py=typeof src.GetY==='function'?src.GetY():src._y||100;
-      var ni=rt.CreateWorldInstance?rt.CreateWorldInstance(type,layer,px,py):null;
-      if(!ni&&type._CreateInstance) ni=type._CreateInstance(layer,px,py);
-      bmosLog(ni?'Copy spawned!':'Spawn API not accessible — try Deep Search for clues');
+      var layout=rt._currentLayout||rt._layoutManager&&rt._layoutManager._currentLayout;
+      var layer=layout&&layout._layers&&layout._layers[0];
+      var ni=null;
+      if(rt.CreateWorldInstance)ni=rt.CreateWorldInstance(type,layer,px,py);
+      if(!ni&&type._CreateInstance)ni=type._CreateInstance(layer,px,py);
+      bmosLog(ni?typeName+' spawned near player!':'Spawn API not accessible on this C3 version');
     }catch(e){bmosLog('Spawn err: '+e.message);}
     return;
   }
 
-  if(cmd==='kill_non_player'){
-    var types=bmosGetTypes(); if(!types){bmosLog('Types not found');return;}
-    var pname=_playerName.toLowerCase();
-    var killed=0;
-    types.forEach(function(t){
-      var n=(t._name||t.name||'').toLowerCase();
-      if(pname&&n===pname) return;
-      if(n.includes('ui')||n.includes('hud')||n.includes('text')||n.includes('layer')) return;
-      var arr=t._instances||t.instances||[];
-      // copy array since destroying modifies it
-      [].concat(arr).forEach(function(i){
-        try{if(typeof i.Destroy==='function'){i.Destroy();killed++;}}catch(e){}
+  if(cmd==='kill_env'){
+    var envNames=['envChunk','envGrass','envPlant','envBush','envCarpet','deadProps','flesh'];
+    var k=0;
+    envNames.forEach(function(name){
+      var arr=bmosInsts(name);
+      // slice to avoid mutation during iteration
+      arr.slice().forEach(function(o){
+        try{if(typeof o.i.Destroy==='function'){o.i.Destroy();k++;}}catch(e){}
       });
     });
-    bmosLog('Destroyed '+killed+' non-player objects');
-    return;
+    bmosLog('Cleared '+k+' environment objects'); return;
   }
 
-  if(cmd==='freeze_non_player'){
-    var types=bmosGetTypes(); if(!types){bmosLog('Types not found');return;}
-    var pname=_playerName.toLowerCase();
-    var frozen=0;
-    types.forEach(function(t){
-      var n=(t._name||t.name||'').toLowerCase();
-      if(pname&&n===pname) return;
-      var arr=t._instances||t.instances||[];
-      arr.forEach(function(i){
-        try{
-          // try platform/physics behavior velocity
-          if(i._behaviors){
-            Object.values(i._behaviors).forEach(function(b){
-              if(b._dx!==undefined){b._dx=0;b._dy=0;frozen++;}
-              if(b._vx!==undefined){b._vx=0;b._vy=0;frozen++;}
-              if(b._speed!==undefined){b._speed=0;frozen++;}
-            });
-          }
-          if(i._vx!==undefined){i._vx=0;i._vy=0;frozen++;}
-        }catch(e){}
-      });
+  if(cmd==='conveyor_fast'||cmd==='conveyor_rev'||cmd==='conveyor_stop'){
+    var convs=bmosInsts('conveyor');
+    var done=0;
+    convs.forEach(function(o){
+      var i=o.i;
+      try{
+        // Construct conveyor belt behavior typically stores speed in _speed or via behavior
+        var spd=cmd==='conveyor_stop'?0:cmd==='conveyor_fast'?600:-300;
+        if(i._behaviors){
+          Object.values(i._behaviors).forEach(function(b){
+            if(b._speed!==undefined){b._speed=spd;done++;}
+            if(b._scrollSpeed!==undefined){b._scrollSpeed=spd;done++;}
+          });
+        }
+        if(i._speed!==undefined){i._speed=spd;done++;}
+      }catch(e){}
     });
-    bmosLog(frozen?'Froze '+frozen+' behavior(s)':'Velocity properties not found on non-player objects');
-    return;
+    bmosLog(done?'Conveyors updated ('+done+' props)':'Conveyor speed prop not found'); return;
   }
 }
 
