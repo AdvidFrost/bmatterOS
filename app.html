@@ -333,9 +333,12 @@
 <script>
 // ════════════════════════════════════════════════════════════════
 // GAMES LIST
-// type: 'builtin'  → opens in-app (tictactoe, stewieclicker)
-// type: 'external' → opens via about:blank injection
-// url: relative path to the local game HTML file in this repo
+// type: 'builtin'   → opens in-app overlay (tic-tac-toe, stewie clicker)
+// type: 'external'  → opens in about:blank tab/window
+//   hosted: 'cdn'   → game HTML fetched from this repo, assets load from CDN
+//                     uses fetch + document.write bootstrap
+//   hosted: 'local' → game + all assets are in this repo (same origin)
+//                     uses full-page iframe inside about:blank
 // ════════════════════════════════════════════════════════════════
 const GAMES = [
   {
@@ -344,6 +347,7 @@ const GAMES = [
     emoji: '⚔️',
     tag: 'built-in',
     type: 'builtin',
+    hosted: 'local',
     url: '',
     banner: '',
     icon: '',
@@ -355,6 +359,7 @@ const GAMES = [
     emoji: '🍪',
     tag: 'built-in',
     type: 'builtin',
+    hosted: 'local',
     url: 'games/stewie-clicker/index.html',
     banner: '',
     icon: '',
@@ -366,6 +371,7 @@ const GAMES = [
     emoji: '🏈',
     tag: 'sports',
     type: 'external',
+    hosted: 'cdn',
     url: 'games/retro-bowl/index.html',
     banner: 'https://cdn.jsdelivr.net/gh/FailedRifle/hamburger@main/games/retro-bowl/banner.png',
     icon: 'https://cdn.jsdelivr.net/gh/FailedRifle/hamburger@main/games/retro-bowl/icon.png',
@@ -377,6 +383,7 @@ const GAMES = [
     emoji: '🌟',
     tag: 'platformer',
     type: 'external',
+    hosted: 'cdn',
     url: 'games/sm64/index.html',
     banner: '',
     icon: '',
@@ -388,6 +395,7 @@ const GAMES = [
     emoji: '🧀',
     tag: 'arcade',
     type: 'external',
+    hosted: 'cdn',
     url: 'games/cheeserolling/index.html',
     banner: '',
     icon: '',
@@ -399,6 +407,7 @@ const GAMES = [
     emoji: '🎮',
     tag: 'arcade',
     type: 'external',
+    hosted: 'local',
     url: 'games/cob-can-move/www/index.html',
     banner: '',
     icon: '',
@@ -411,6 +420,7 @@ const GAMES = [
   //   emoji: '🎮',
   //   tag: 'arcade',
   //   type: 'external',
+  //   hosted: 'cdn',   // 'cdn' = assets from CDN, 'local' = all files in repo
   //   url: 'games/mygame/index.html',
   //   banner: '',
   //   icon: '',
@@ -542,6 +552,29 @@ function closeDetail() {
   document.getElementById('game-detail').classList.remove('show');
 }
 
+function openGameWindow(bootstrap, gameId) {
+  if (launchMode === 'blank') {
+    const win = window.open('about:blank#bmos/' + gameId, '_blank');
+    if (!win) { alert('Pop-ups are blocked! Please allow pop-ups for this site.'); return; }
+    win.document.open();
+    win.document.write(bootstrap);
+    win.document.close();
+  } else {
+    const w = Math.round(screen.availWidth * 0.75);
+    const h = Math.round(screen.availHeight * 0.8);
+    const l = Math.round((screen.availWidth - w) / 2);
+    const t = Math.round((screen.availHeight - h) / 2);
+    const win = window.open(
+      'about:blank#bmos/' + gameId, '_blank',
+      `width=${w},height=${h},left=${l},top=${t},menubar=no,toolbar=no,resizable=yes`
+    );
+    if (!win) { alert('Pop-ups are blocked! Please allow pop-ups for this site.'); return; }
+    win.document.open();
+    win.document.write(bootstrap);
+    win.document.close();
+  }
+}
+
 function launchGame(game) {
   if (game.type === 'builtin') {
     document.getElementById('overlay-title').textContent = game.name;
@@ -557,40 +590,31 @@ function launchGame(game) {
   }
 
   const gameAbsUrl = new URL(game.url, window.location.href).href;
-  // Base dir of the game file so relative asset paths resolve correctly after injection
-  const gameDir = gameAbsUrl.substring(0, gameAbsUrl.lastIndexOf('/') + 1);
 
-  const bootstrap =
-    `<!doctype html><html><head><title>${game.name}</title>` +
-    `<style>*{margin:0;padding:0;}html,body{width:100%;height:100%;overflow:hidden;background:#000;}</style></head>` +
-    `<body><script>(async()=>{try{` +
-    `const r=await fetch('${gameAbsUrl}?t='+Date.now(),{cache:'no-store'});` +
-    `const h=await r.text();` +
-    `const base='<base href="${gameDir}">';` +
-    `const html=h.replace(/(<head[^>]*>)/i,'$1'+base);` +
-    `document.open();document.write(html===h?base+h:html);document.close();` +
-    `}catch(e){document.body.innerHTML='<div style="color:#fff;padding:20px;font-family:sans-serif;">Failed to load: '+e.message+'</div>';}` +
-    `})();<\/script></body></html>`;
-
-  if (launchMode === 'blank') {
-    const win = window.open('about:blank#bmos/' + game.id, '_blank');
-    if (!win) { alert('Pop-ups are blocked! Please allow pop-ups for this site.'); return; }
-    win.document.open();
-    win.document.write(bootstrap);
-    win.document.close();
-  } else if (launchMode === 'window') {
-    const w = Math.round(screen.availWidth * 0.75);
-    const h = Math.round(screen.availHeight * 0.8);
-    const l = Math.round((screen.availWidth - w) / 2);
-    const t = Math.round((screen.availHeight - h) / 2);
-    const win = window.open(
-      'about:blank#bmos/' + game.id, '_blank',
-      `width=${w},height=${h},left=${l},top=${t},menubar=no,toolbar=no,resizable=yes`
-    );
-    if (!win) { alert('Pop-ups are blocked! Please allow pop-ups for this site.'); return; }
-    win.document.open();
-    win.document.write(bootstrap);
-    win.document.close();
+  if (game.hosted === 'local') {
+    // Same-origin game: iframe inside about:blank avoids document.write timing issues
+    // Tab URL stays about:blank for cloaking while the iframe loads normally
+    const bootstrap =
+      `<!doctype html><html><head><title>${game.name}</title>` +
+      `<style>*{margin:0;padding:0;}html,body,iframe{width:100%;height:100%;border:none;overflow:hidden;background:#000;display:block;}</style></head>` +
+      `<body><iframe src="${gameAbsUrl}" allowfullscreen allow="autoplay;fullscreen"></iframe></body></html>`;
+    openGameWindow(bootstrap, game.id);
+  } else {
+    // CDN-backed game: fetch HTML from this repo, inject base href, write into blank doc
+    // Can't iframe CDN URLs directly due to X-Frame-Options
+    const gameDir = gameAbsUrl.substring(0, gameAbsUrl.lastIndexOf('/') + 1);
+    const bootstrap =
+      `<!doctype html><html><head><title>${game.name}</title>` +
+      `<style>*{margin:0;padding:0;}html,body{width:100%;height:100%;overflow:hidden;background:#000;}</style></head>` +
+      `<body><script>(async()=>{try{` +
+      `const r=await fetch('${gameAbsUrl}?t='+Date.now(),{cache:'no-store'});` +
+      `const h=await r.text();` +
+      `const base='<base href="${gameDir}">';` +
+      `const html=h.replace(/(<head[^>]*>)/i,'$1'+base);` +
+      `document.open();document.write(html===h?base+h:html);document.close();` +
+      `}catch(e){document.body.innerHTML='<div style="color:#fff;padding:20px;font-family:sans-serif;">Failed to load: '+e.message+'</div>';}` +
+      `})();<\/script></body></html>`;
+    openGameWindow(bootstrap, game.id);
   }
 }
 
