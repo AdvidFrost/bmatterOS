@@ -142,7 +142,7 @@
         <div class="sl">Cobb / monsters</div>
         <div class="br">
           <button class="bb" onclick="bmosHack('kill_cobb')">&#x1F480; Kill All Cobb</button>
-          <button class="bb" onclick="bmosHack('freeze_cobb')">&#x1F9CA; Freeze Cobb</button>
+          <button class="bb" id="bfreeze" onclick="bmosToggleFreeze()">&#x1F9CA; Freeze Cobb</button>
         </div>
         <div class="br">
           <button class="bb" onclick="bmosHack('giant_cobb')">&#x1F53C; Giant Cobb</button>
@@ -205,61 +205,51 @@ function bmosGetType(name){
 }
 function bmosInsts(name){
   var t=bmosGetType(name); if(!t) return [];
-  var arr=t._instances||[];
-  return arr.map(function(i){return {t:t,i:i,n:t._name||name};});
+  return (t._instances||[]).map(function(i){return {t:t,i:i,n:t._name||name};});
 }
 
 // ── Instance helpers ────────────────────────────────────────────────────────────
+// _worldInfo uses _x/_y/_w/_h (confirmed)
 function bmosGetXY(i){
   var wi=i._worldInfo;
-  if(wi) return {x:wi._x||0,y:wi._y||0};
-  return {x:typeof i.GetX==='function'?i.GetX():(i._x||0),y:typeof i.GetY==='function'?i.GetY():(i._y||0)};
+  return wi?{x:wi._x||0,y:wi._y||0}:{x:0,y:0};
 }
 function bmosSetXY(i,x,y){
-  try{
-    var wi=i._worldInfo;
-    if(wi){wi._x=x;wi._y=y;}
-    else if(typeof i.SetX==='function'){i.SetX(x);i.SetY(y);}
-    else{i._x=x;i._y=y;}
-  }catch(e){}
-}
-function bmosSetSize(i,w,h){
-  try{
-    // prefer _sdkInst.width/height — the public C3 JS interface
-    if(i._sdkInst){
-      i._sdkInst.width=w;
-      i._sdkInst.height=h;
-      return;
-    }
-    var wi=i._worldInfo;
-    if(wi){wi._width=w;wi._height=h;return;}
-    if(typeof i.SetSize==='function'){i.SetSize(w,h);return;}
-    i._width=w;i._height=h;
-  }catch(e){}
+  var wi=i._worldInfo;
+  if(wi){wi._x=x;wi._y=y;}
 }
 function bmosGetSize(i){
-  if(i._sdkInst&&i._sdkInst.width!==undefined) return {w:i._sdkInst.width,h:i._sdkInst.height};
   var wi=i._worldInfo;
-  if(wi) return {w:wi._width||32,h:wi._height||32};
-  return {w:i._width||32,h:i._height||32};
+  return wi?{w:wi._w||32,h:wi._h||32}:{w:32,h:32};
 }
+function bmosSetSize(i,w,h){
+  // _worldInfo._w/_h is the canonical size in this C3 build
+  var wi=i._worldInfo;
+  if(wi){wi._w=w;wi._h=h;}
+}
+// _iScriptInterface is the public C3 JS instance interface with .destroy()
 function bmosDestroy(i){
   try{
-    if(i._sdkInst&&typeof i._sdkInst.destroy==='function'){i._sdkInst.destroy();return true;}
-    if(i._iScriptInterface&&typeof i._iScriptInterface.destroy==='function'){i._iScriptInterface.destroy();return true;}
-    if(typeof i.Destroy==='function'){i.Destroy();return true;}
+    var iface=i._iScriptInterface;
+    if(iface&&typeof iface.destroy==='function'){iface.destroy();return true;}
   }catch(e){}
   return false;
 }
-function bmosBehaviors(i){
-  var bis=i._behaviorInstances;
-  if(!bis) return [];
-  return Array.isArray(bis)?bis:Object.values(bis);
+// Behaviors are in _behaviorInstances array;
+// each entry's _sdkInst holds the actual behavior properties (_maxSpeed etc.)
+function bmosBehaviorSDKs(i){
+  var bis=i._behaviorInstances||[];
+  var out=[];
+  for(var j=0;j<bis.length;j++){
+    var sdk=bis[j]&&bis[j]._sdkInst;
+    if(sdk) out.push(sdk);
+  }
+  return out;
 }
 function bmosFindPlatBehavior(i){
-  var bs=bmosBehaviors(i);
-  for(var j=0;j<bs.length;j++){
-    if(bs[j]&&bs[j]._maxSpeed!==undefined) return bs[j];
+  var sdks=bmosBehaviorSDKs(i);
+  for(var j=0;j<sdks.length;j++){
+    if(sdks[j]._maxSpeed!==undefined) return sdks[j];
   }
   return null;
 }
@@ -279,15 +269,12 @@ function bmosDiag(){
     out(name+': '+arr.length+' instances');
     if(arr[0]){
       var wi=arr[0]._worldInfo;
-      if(wi)out('  wi: x='+wi._x+' y='+wi._y+' w='+wi._width+' h='+wi._height);
-      var bs=bmosBehaviors(arr[0]);
-      out('  behaviors: '+bs.length);
+      if(wi) out('  wi: x='+wi._x+' y='+wi._y+' w='+wi._w+' h='+wi._h);
+      out('  behaviors: '+(arr[0]._behaviorInstances||[]).length);
     }
   });
   out('-- done --');
 }
-
-// SDK/behavior deep-dive for player and flesh
 function bmosSDKDiag(){
   _logLines=[];
   var el=document.getElementById('bmos-log');
@@ -298,32 +285,23 @@ function bmosSDKDiag(){
     var t=bmosGetType(name);
     if(!t){out(name+': NOT found');return;}
     var arr=t._instances||[];
-    if(!arr.length){out(name+': 0 instances (get into game first)');return;}
+    if(!arr.length){out(name+': 0 instances');return;}
     var i=arr[0];
     out('=== '+name+' ===');
-    // sdkInst
-    var sdk=i._sdkInst;
-    if(!sdk){out('  _sdkInst: null');}
-    else{
-      out('  sdk.width='+sdk.width+' sdk.height='+sdk.height+' destroy='+typeof sdk.destroy);
-      // get all own + prototype keys
-      var sdkKeys=[];
-      for(var k in sdk){try{sdkKeys.push(k);}catch(e){}}
-      out('  sdk keys: '+sdkKeys.slice(0,20).join(','));
-    }
-    // behaviors
-    var bs=bmosBehaviors(i);
-    out('  _behaviorInstances: '+bs.length);
-    bs.forEach(function(b,j){
-      if(!b){out('  ['+j+']: null');return;}
-      var bkeys=[];
-      for(var k in b){try{bkeys.push(k);}catch(e){}}
-      out('  ['+j+']: '+bkeys.slice(0,10).join(','));
-      if(b._maxSpeed!==undefined) out('    ^ Platform! maxSpd='+b._maxSpeed);
-    });
-    // worldInfo keys
     var wi=i._worldInfo;
-    if(wi) out('  wi keys: '+Object.keys(wi).slice(0,12).join(','));
+    if(wi) out('  wi: x='+wi._x+' y='+wi._y+' w='+wi._w+' h='+wi._h);
+    var iface=i._iScriptInterface;
+    out('  _iScriptInterface.destroy='+typeof(iface&&iface.destroy));
+    var bis=i._behaviorInstances||[];
+    out('  behaviors: '+bis.length);
+    bis.forEach(function(b,j){
+      var sdk=b&&b._sdkInst;
+      if(!sdk){out('  ['+j+']: no _sdkInst');return;}
+      var keys=[];
+      for(var k in sdk){try{keys.push(k);}catch(e){}}
+      out('  ['+j+'] sdk keys: '+keys.slice(0,12).join(','));
+      if(sdk._maxSpeed!==undefined) out('    ^ Platform! maxSpd='+sdk._maxSpeed);
+    });
   });
   out('-- done --');
 }
@@ -360,7 +338,7 @@ function bmosPlayerSpeed(mult,id){
   var pl=bmosInsts('player');
   if(!pl.length){bmosLog('player not found');return;}
   var plat=bmosFindPlatBehavior(pl[0].i);
-  if(!plat){bmosLog('Platform behavior not found — run SDK Diag to investigate');return;}
+  if(!plat){bmosLog('Platform behavior not found — run SDK Diag');return;}
   if(!_platOrig){
     _platOrig={
       maxSpeed:plat._maxSpeed,
@@ -398,7 +376,7 @@ function bmosZoom(f){_zoom=Math.min(4,Math.max(0.2,_zoom*f));bmosApplyFx();}
 function bmosZoomReset(){_zoom=1;bmosApplyFx();}
 function bmosFullscreen(){
   if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(function(){});
-  else document.exitFullscreen().catch(function(){});  
+  else document.exitFullscreen().catch(function(){});
 }
 function bmosScreenshot(){
   var c=document.querySelector('canvas');
@@ -426,15 +404,8 @@ function bmosMaxBar(name){
   var t=bmosGetType(name); if(!t) return;
   (t._instances||[]).forEach(function(i){
     try{
-      if(i._sdkInst){
-        var sdk=i._sdkInst;
-        if(typeof sdk.instVars==='object'&&sdk.instVars){
-          Object.keys(sdk.instVars).forEach(function(k){sdk.instVars[k]=100;});
-        }
-        if(sdk.width!==undefined&&i._worldInfo&&i._origBarW)sdk.width=i._origBarW;
-      }
       var wi=i._worldInfo;
-      if(wi){if(!i._origBarW)i._origBarW=wi._width||100;wi._width=i._origBarW;}
+      if(wi){if(!i._origBarW)i._origBarW=wi._w||100;wi._w=i._origBarW;}
     }catch(e){}
   });
 }
@@ -443,16 +414,43 @@ function bmosMaxBar(name){
 function bmosResize(insts,scale){
   var done=0;
   insts.forEach(function(o){
-    var i=o.i;
     try{
-      var sz=bmosGetSize(i);
-      if(!i._origW){i._origW=sz.w;i._origH=sz.h;}
-      var w=i._origW*(scale<0?1:scale),h=i._origH*(scale<0?1:scale);
-      bmosSetSize(i,w,h);
+      var sz=bmosGetSize(o.i);
+      if(!o.i._origW){o.i._origW=sz.w;o.i._origH=sz.h;}
+      var w=o.i._origW*(scale<0?1:scale),h=o.i._origH*(scale<0?1:scale);
+      bmosSetSize(o.i,w,h);
       done++;
     }catch(e){}
   });
   return done;
+}
+
+// ── Freeze Cobb: position-lock (no behaviors — movement is event-driven) ───────────────
+var _freezeCobb=false,_freezeTimer=null,_frozenPositions=[];
+function bmosToggleFreeze(){
+  _freezeCobb=!_freezeCobb;
+  var b=document.getElementById('bfreeze');
+  b.classList.toggle('on',_freezeCobb);
+  b.textContent=_freezeCobb?'&#x1F9CA; Frozen':'&#x1F9CA; Freeze Cobb';
+  if(_freezeCobb){
+    // snapshot current positions of all flesh instances
+    _frozenPositions=[];
+    bmosInsts('flesh').concat(bmosInsts('monsterProp')).forEach(function(o){
+      var p=bmosGetXY(o.i);
+      _frozenPositions.push({i:o.i,x:p.x,y:p.y});
+    });
+    if(!_frozenPositions.length){bmosLog('No Cobb on screen');_freezeCobb=false;b.classList.remove('on');b.textContent='&#x1F9CA; Freeze Cobb';return;}
+    _freezeTimer=setInterval(function(){
+      _frozenPositions.forEach(function(fp){
+        try{bmosSetXY(fp.i,fp.x,fp.y);}catch(e){}
+      });
+    },16);
+    bmosLog('Cobb frozen in place ('+_frozenPositions.length+' instances)');
+  } else {
+    clearInterval(_freezeTimer);
+    _frozenPositions=[];
+    bmosLog('Cobb unfrozen');
+  }
 }
 
 // ── Hacks ─────────────────────────────────────────────────────────────────────
@@ -485,8 +483,8 @@ function bmosHack(cmd){
     if(plat){
       bmosLog('Platform: maxSpd='+(plat._maxSpeed|0)+' accel='+(plat._accel|0)+' jump='+(plat._jumpStrength|0));
     } else {
-      var bs=bmosBehaviors(pl[0].i);
-      bmosLog('No Platform found. '+bs.length+' behaviors. Run SDK Diag.');
+      var sdks=bmosBehaviorSDKs(pl[0].i);
+      bmosLog('No Platform in '+sdks.length+' behavior SDKs. Run SDK Diag.');
     }
     return;
   }
@@ -495,20 +493,14 @@ function bmosHack(cmd){
     var targets=bmosInsts('flesh').concat(bmosInsts('monsterProp'));
     var k=0;
     targets.forEach(function(o){if(bmosDestroy(o.i))k++;});
-    bmosLog(targets.length?(k?'Destroyed '+k+' Cobb':'destroy() not available — run SDK Diag'):'No flesh/monsterProp found');return;
+    // clear freeze if active
+    if(k&&_freezeCobb){
+      clearInterval(_freezeTimer);_freezeCobb=false;_frozenPositions=[];
+      var fb=document.getElementById('bfreeze');fb.classList.remove('on');fb.textContent='&#x1F9CA; Freeze Cobb';
+    }
+    bmosLog(targets.length?(k?'Destroyed '+k+' Cobb':'destroy unavailable — try Pause instead'):'No Cobb found');return;
   }
-  if(cmd==='freeze_cobb'){
-    var targets=bmosInsts('flesh').concat(bmosInsts('monsterProp'));
-    var f=0;
-    targets.forEach(function(o){
-      bmosBehaviors(o.i).forEach(function(b){
-        ['_dx','_dy','_vx','_vy','_speed','_platformVx','_platformVy','_velX','_velY'].forEach(function(k){
-          if(b[k]!==undefined){b[k]=0;f++;}
-        });
-      });
-    });
-    bmosLog(targets.length?(f?'Froze '+targets.length+' Cobb ('+f+' props)':'No velocity props found — run SDK Diag'):'No Cobb found');return;
-  }
+
   if(cmd==='giant_cobb'){var n=bmosResize(bmosInsts('flesh').concat(bmosInsts('monsterProp')),4);bmosLog(n?'Cobb enormous':'flesh/monsterProp not found');return;}
   if(cmd==='tiny_cobb'){var n=bmosResize(bmosInsts('flesh').concat(bmosInsts('monsterProp')),0.2);bmosLog(n?'Cobb tiny':'flesh/monsterProp not found');return;}
 
@@ -525,7 +517,7 @@ function bmosHack(cmd){
       var ni=null;
       if(typeof rt.CreateWorldInstance==='function')ni=rt.CreateWorldInstance(t,layer,px,py);
       if(!ni&&typeof t._CreateInstance==='function')ni=t._CreateInstance(layer,px,py);
-      bmosLog(ni?typeName+' spawned!':'Spawn API not found');
+      bmosLog(ni?typeName+' spawned!':'Spawn API not found on this C3 build');
     }catch(e){bmosLog('Spawn err: '+e.message);}
     return;
   }
@@ -540,10 +532,10 @@ function bmosHack(cmd){
     var done=0;
     bmosInsts('conveyor').forEach(function(o){
       var spd=cmd==='conveyor_stop'?0:cmd==='conveyor_fast'?600:-300;
-      bmosBehaviors(o.i).forEach(function(b){
-        if(b._speed!==undefined){b._speed=spd;done++;}
-        if(b._scrollSpeed!==undefined){b._scrollSpeed=spd;done++;}
-        if(b._rate!==undefined){b._rate=spd;done++;}
+      bmosBehaviorSDKs(o.i).forEach(function(sdk){
+        if(sdk._speed!==undefined){sdk._speed=spd;done++;}
+        if(sdk._scrollSpeed!==undefined){sdk._scrollSpeed=spd;done++;}
+        if(sdk._rate!==undefined){sdk._rate=spd;done++;}
       });
     });
     bmosLog(done?'Conveyors: '+done+' props':'Conveyor props not found');return;
